@@ -1,0 +1,7 @@
+pypdf>=6.0          # Basel Framework PDF extraction, with a text-run visitor
+numpy>=2.0
+scipy>=1.15
+scikit-learn>=1.6   # TF-IDF + TruncatedSVD for the latent-semantic retriever
+rank_bm25>=0.2      # lexical retrieval over regulatory terms of art
+pandas>=2.2
+pyarrow>=17.0       # parquet for the quarterly bank panel

@@ -1,0 +1,25 @@
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+.ipynb_checkpoints/
+
+# Meeting material — a recording of identifiable people. Deliberately not
+# published. `docs/requirements_from_meeting.md` carries the derived brief.
+*.mp3
+docs/transcript_raw.txt
+
+# Source documents. The BIS reserves copyright in the Basel Framework and
+# permits brief excerpts only, so neither the PDFs nor the full text extraction
+# are redistributed here. Run scripts/fetch_basel.sh, then the parser.
+data/basel/*.pdf
+data/basel/*.jsonl
+
+# Regenerable data pulls (FDIC, public domain but large and reproducible)
+data/raw/
+
+# Local outputs
+outputs/phase1/
+*.parquet
+
+.DS_Store
