@@ -273,26 +273,28 @@ footer{border-top:1px solid var(--rule); margin-top:72px; padding-top:24px;
 <div class="step">
   <div class="rail">
     <span class="n">1</span>
-    <ul><li>CRE20.94</li><li>CRE20.100</li><li>12 CFR 217.33</li></ul>
+    <ul><li>CRE20.94</li><li>CRE20.100</li><li>12 CFR 217.33(b)(1)</li><li>12 CFR 217.2</li></ul>
   </div>
   <div>
     <h3>Exposure at default</h3>
-    <p>Basel converts off-balance-sheet commitments into credit-equivalent exposure with a credit conversion factor. A commitment that is <em>unconditionally cancellable at any time without prior notice</em> takes a <strong>10% CCF</strong> — which is exactly what a credit-card line is.</p>
+    <p>Basel converts off-balance-sheet commitments into credit-equivalent exposure with a credit conversion factor. Under the Basel III finalisation standard, effective 1 January 2023, a commitment that is <em>unconditionally cancellable at any time without prior notice</em> takes a <strong>10% CCF</strong>.</p>
     <div class="formula">EAD = drawn + undrawn × CCF<br><b>Comenity:</b> $6.76bn + $37.77bn × 0.10 = <b>$10.53bn</b></div>
-    <p>The same undrawn lines take a <strong>0% CCF</strong> under the US rule in force today, so they contribute nothing to reported exposure.</p>
+    <p>Two qualifications the framework imposes on itself. Basel does not classify card lines as unconditionally cancellable — that turns on the contract and on local law, and CRE20.100 expressly lets supervisors impose a <em>higher</em> factor where cancellation is constrained in practice. In the US the classification does generally hold: Regulation Z requires no advance notice to cut a card line, and issuers report substantially all unused card lines as unconditionally cancelable in Schedule RC-R.</p>
+    <p>The US rule in force applies <strong>0%</strong> to the same lines (<span class="cite">12 CFR 217.33(b)(1)</span>), so they contribute nothing to reported exposure. The 10% figure exists in the US only as a March 2026 proposal covering the largest banks; the companion proposal for everyone else retains 0%.</p>
   </div>
 </div>
 
 <div class="step">
   <div class="rail">
     <span class="n">2</span>
-    <ul><li>CRE20.65</li><li>CRE20.66</li><li>CRE20.68</li><li>12 CFR 217.32</li></ul>
+    <ul><li>CRE20.65</li><li>CRE20.66</li><li>CRE20.68</li><li>CRE20.106</li><li>12 CFR 217.32(l)(5)</li></ul>
   </div>
   <div>
     <h3>Risk weight</h3>
     <p>Credit cards are named explicitly in Basel's "regulatory retail" product criterion, so the book qualifies subject to a €1m per-counterparty ceiling and a 0.2% granularity limit. The weight then turns on whether the obligor is a <em>transactor</em> — someone who repaid in full at every scheduled date for twelve months.</p>
     <div class="formula"><b>45%</b> transactor · <b>75%</b> regulatory retail, non-transactor · <b>100%</b> other retail</div>
-    <p>No US regulatory report collects the transactor split. The output is therefore a <strong>band across all three weights</strong>, not a point estimate — with 75% reported as central, since a bank that cannot demonstrate transactor status cannot claim 45%.</p>
+    <p>No US regulatory report discloses the transactor split, so the output is a <strong>band across all three weights</strong> rather than a point estimate. 75% is the default rather than a conservative election — it is where regulatory retail lands when transactor status cannot be evidenced — and it is not an upper bound either: defaulted exposures attract 150% under CRE20.106.</p>
+    <p>The US assigns credit-card loans to no retail category at all. They fall into the residual "other assets" bucket at <strong>100%</strong> (<span class="cite">12 CFR 217.32(l)(5)</span>), rising to <strong>150%</strong> on the unsecured portion of balances 90+ days past due or on nonaccrual (<span class="cite">§ 217.32(k)</span>).</p>
   </div>
 </div>
 
@@ -305,20 +307,21 @@ footer{border-top:1px solid var(--rule); margin-top:72px; padding-top:24px;
     <h3>Capital adequacy</h3>
     <p>The card book's Basel RWA replaces its US contribution in the bank's reported total, and the restated ratio is tested against the minimum and the buffer.</p>
     <div class="formula">RWA′ = RWA_reported − (drawn × 100%) + (EAD × rw)<br>test <b>CET1 ≥ 4.5%</b> (minimum) and <b>≥ 7.0%</b> (with the 2.5% conservation buffer)</div>
-    <p>Falling into the buffer range constrains capital distributions rather than breaching the minimum, so the two thresholds are reported separately.</p>
+    <p>Falling into the buffer range constrains capital distributions rather than breaching the minimum, so the two thresholds are reported separately. 7.0% is the effective CET1 threshold only for a bank meeting its tier 1 and total capital minimums entirely with other instruments; CET1 must first fill any shortfall against those, and the US buffer is the lowest of the three legs (<span class="cite">12 CFR 217.11(a)(3)(i)</span>).</p>
   </div>
 </div>
 
 <div class="step">
   <div class="rail">
     <span class="n">4</span>
-    <ul><li>LCR40.64</li><li>RC <code>0071</code>/<code>0081</code></li><li>RC <code>1773</code>, <code>JJ34</code></li></ul>
+    <ul><li>LCR40.59</li><li>LCR40.64</li><li>LCR40.67</li><li>RC <code>0071</code>/<code>0081</code></li></ul>
   </div>
   <div>
     <h3>Liquidity stress</h3>
-    <p>Basel's LCR assumes a <strong>5% drawdown</strong> within thirty days on undrawn committed facilities to retail and small-business customers. Set against the bank's cash, securities and money-market placements, this is the supervisor's own worked example made computable: <em>can the bank fund the lines it has already promised?</em></p>
+    <p>Basel assigns a <strong>5% drawdown</strong> within thirty days to undrawn committed facilities to retail and small-business customers. But <strong>LCR40.59 excludes unconditionally cancellable facilities from that section altogether</strong>, routing them to national discretion under LCR40.67 — the same property that earns a card line its low conversion factor also removes it from the committed-facility drawdown.</p>
+    <p>So the 5% here is <strong>a chosen stress parameter, not a Basel requirement</strong>: it borrows the rate Basel sets for facilities a bank cannot cancel and applies it to facilities it can. That makes it deliberately severe, and makes the rate itself something to defend — which is exactly the scenario-plausibility question the brief raises.</p>
     <div class="formula">cover = liquid assets ÷ (undrawn × 0.05)<br><b>Comenity:</b> $1.23bn ÷ $1.89bn = <b>0.65×</b></div>
-    <p>This is an <em>analytical stress</em>, not a compliance test — the US LCR rule does not reach banks of this size. That distinction is stated wherever the number appears.</p>
+    <p>It is not a compliance test either way. The US LCR sets scope by tailoring category rather than a single asset test, and no applicability hook reaches an institution below $10bn.</p>
   </div>
 </div>
 
@@ -405,9 +408,9 @@ footer{border-top:1px solid var(--rule); margin-top:72px; padding-top:24px;
     <tr><td>Card balances</td><td><code>RC-C B538</code></td><td class="n">45 / 50</td><td><span class="pill p-ok">usable</span></td></tr>
     <tr><td>Card interest income</td><td><code>RI B485</code></td><td class="n">43 / 50</td><td><span class="pill p-ok">usable</span></td></tr>
     <tr><td>Delinquency 30–89 / 90+</td><td><code>RC-N B575/B576</code></td><td class="n">37 / 26</td><td><span class="pill p-warn">partial</span></td></tr>
-    <tr><td>Risk-weighted assets</td><td><code>RC-R A223</code></td><td class="n">42 / 50</td><td><span class="pill p-warn">8 CBLR filers report none</span></td></tr>
+    <tr><td>Risk-weighted assets</td><td><code>RC-R A223</code></td><td class="n">42 / 50</td><td><span class="pill p-warn">8 CBLR electors report none</span></td></tr>
     <tr><td>Transactor / revolver split</td><td>—</td><td class="n">0 / 50</td><td><span class="pill p-crit">not collected anywhere</span></td></tr>
-    <tr><td>Card book by PD band</td><td><code>RC-O N040–N054</code></td><td class="n">0 / 50</td><td><span class="pill p-crit">large filers only</span></td></tr>
+    <tr><td>Card book by PD band</td><td><code>RC-O N040–N054</code></td><td class="n">0 / 50</td><td><span class="pill p-crit">withheld from all 4,394 filers</span></td></tr>
     <tr><td>HQLA, net 30-day outflows</td><td>FR 2052a</td><td class="n">0 / 50</td><td><span class="pill p-crit">$100bn+ filers only</span></td></tr>
   </tbody>
 </table>
@@ -417,7 +420,8 @@ footer{border-top:1px solid var(--rule); margin-top:72px; padding-top:24px;
 <h3>Why each limit is itself a result</h3>
 <p><strong>The transactor split decides Basel's headline retail weight and no one collects it.</strong> A rule that turns on an unobservable is unenforceable from outside the issuer — which is why the output is a band.</p>
 <p><strong>Eight of fifty banks report no risk-weighted assets at all.</strong> Having elected the community bank leverage ratio, they are outside the risk-based framework entirely. Basel's risk weights are not hard to check for them; they do not apply. That is the supervisor's own point — requirements scale with size — showing up as missing data.</p>
-<p><strong>The data that would permit a proper risk segmentation exists, and small banks are exempt from reporting it.</strong> Schedule RC-O buckets the card book by two-year probability of default; it is blank for every bank under $10bn. So the analysis must use the standardised approach, not the internal-ratings approach.</p>
+<p><strong>The data that would permit a proper risk segmentation exists and is withheld from everyone.</strong> Schedule RC-O buckets the card book by two-year probability of default. Those fields return the literal marker <code>CONF</code> for all 4,394 filers — the FDIC does not release them institution by institution, at any size. Nothing can be inferred from their absence, and the analysis must use the standardised approach rather than internal ratings.</p>
+<p><strong>The community bank leverage ratio is an election, not a size band.</strong> Being under $10bn does not imply a bank reports no risk-weighted assets — the asset test is one of four qualifying criteria and the framework is opt-in. Nationally, 1,722 of 4,394 filers leave the RWA field empty, so a capital panel built naively on it drops 39% of banks, skewed small.</p>
 </div>
 
 <div class="callout flag">
@@ -430,13 +434,15 @@ footer{border-top:1px solid var(--rule); margin-top:72px; padding-top:24px;
 <div class="col">
 <p><strong>Rules are grounded mechanically.</strong> Every extracted rule carries a quotation that must appear character-for-character in the paragraph it cites, checked by exact substring match. No model is asked whether a quote is faithful, so no model can be wrong about it. All 673 rules pass; those that fail are dropped, not repaired.</p>
 <p><strong>Field mappings are cross-validated.</strong> The CET1 ratio computed from our own mapping reproduces the ratio each bank reports itself. Where it did not, the mapping was wrong and was fixed.</p>
-<p><strong>Regulatory assumptions are tested against the data, not asserted.</strong> Comenity's reported RWA divided by its drawn balances is 1.03 — RWA is essentially the drawn book at 100%, and $37.8bn of undrawn lines contributes nothing. That confirms the US 0% conversion factor empirically rather than on the strength of a citation.</p>
+<p><strong>Regulatory assumptions are tested against the filing, not asserted.</strong> Schedule RC-R Part II reports Comenity's undrawn card lines at their full $37.77bn face amount with a credit-equivalent amount of exactly zero. That is the US 0% conversion factor visible as a reported line item, which is stronger evidence than the ratio of RWA to drawn balances we first used.</p>
 <p><strong>Implausible results are chased, not shipped.</strong> John Deere Financial appeared to hold zero liquid assets; the cause was a field that not every bank files, and correcting it changed the population failing the liquidity stress from seven banks to six.</p>
 </div>
 
 <div class="callout flag">
-  <h3>Status of the US-side claims</h3>
-  <p>The Basel citations above are drawn from the parsed framework and are checked. The claims about the US rule — the 0% conversion factor, the flat 100% retail weight, the $10bn and $100bn thresholds — are stated from the regulation but a verification pass against the Code of Federal Regulations is still running. US adoption of the Basel III endgame has been proposed and revised repeatedly, so <em>in force today</em> versus <em>proposed</em> needs confirming before these go into anything final.</p>
+  <h3>What the verification pass changed</h3>
+  <p>Twenty-four claims in this document were checked against the Code of Federal Regulations and the parsed framework before publication. Four were corrected as a result, and they are worth knowing about because each was wrong in a way that would have survived casual review.</p>
+  <p>The claim that a card line simply <em>is</em> an unconditionally cancellable commitment was an inference dressed as a definition — Basel says no such thing, and the US definition omits Basel's "without prior notice" limb. The 5% liquidity drawdown turned out to be excluded from the very lines it was being applied to, which reframes step 4 from a requirement into a chosen stress. The US retail weight comes from the residual "other assets" bucket, not a retail category, and carries a 150% band this document had omitted. And the claim that RC-O's PD bands are blank because small banks are exempt was simply false: they are withheld from every filer at every size.</p>
+  <p>One thing still moves. US adoption of the Basel III endgame was re-proposed in March 2026 and nothing has been finalised, so every statement here about the US rule describes what is in force as of August 2026, not what is coming.</p>
 </div>
 
 <h2><span class="num">07 — Next</span>What this sets up</h2>
