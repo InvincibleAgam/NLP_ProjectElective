@@ -46,6 +46,13 @@ python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
 .venv/bin/python src/ingest/fdic.py --latest 20260331 --quarters 12 \
         --min-assets 1000000
 
+# 2b. year-end Call Reports — carries the off-balance-sheet schedules the
+#     FDIC series omits, chiefly RC-L item 3815 (unused credit-card lines)
+.venv/bin/python scripts/fetch_callreport.py --date 12/31/2025 \
+        --out data/callreport.zip
+unzip -q data/callreport.zip -d data/callreport_2025Q4
+.venv/bin/python src/ingest/callreport.py      # -> annual_reports_2025/
+
 # 3. query the corpus
 .venv/bin/python src/rag/corpus.py --search "undrawn credit card commitments" -k 8
 .venv/bin/python src/rag/corpus.py --ids CRE20.65,CRE20.68
@@ -71,16 +78,29 @@ or a derivation. This is what makes extracted parameters executable rather than
 decorative — a free-form formula naming `EAD_transactor` cannot be run against
 anything.
 
-**Unmeasurable is a result, not a failure.** Twelve symbols the Basel rules need
-are declared but marked `unavailable`, each with the report that does carry it.
-The most important is `undrawn_credit_card_lines` — Call Report Schedule RC-L
-item 3815 — which is the quantity the supervisor's own worked example turns on
-and which the FDIC series does not publish. Parameters depending on it are
-emitted, flagged, and reported in `coverage.csv` rather than silently dropped or
-quietly proxied.
+**Unmeasurable is a result, not a failure.** Symbols the Basel rules need but no
+public filing carries are declared and marked `unavailable` rather than dropped
+or quietly proxied, each naming the report that would carry it. That discipline
+paid off directly: `undrawn_credit_card_lines` was flagged this way, the flag
+named Call Report Schedule RC-L item 3815, and the data was then sourced from
+exactly there. Ten symbols remain genuinely unavailable — the transactor/revolver
+split, IRB parameters, LCR inputs filed only above $100bn.
 
 ## Findings that change the brief
 
+- **For small card banks the binding exposure is off balance sheet, and the usual
+  data source cannot see it.** Across the 50 small banks with the largest card
+  businesses, undrawn credit-card commitments total **$128.6bn** — several times
+  their drawn balances. Comenity Bank carries $6.8bn drawn against **$37.8bn
+  committed**; Credit First National Association has $39m of assets against
+  $11.4bn of committed lines. None of this is in the FDIC series that most
+  small-bank analysis starts from; it is Call Report Schedule RC-L item 3815.
+  Converting it at Basel's 10% CCF for unconditionally cancellable commitments
+  (CRE20.100) and the 75% retail risk weight (CRE20.68) moves Comenity's CET1
+  ratio from 15.1% to 10.7%, and TCM Bank's from 20.9% to 14.0%.
+  **The US rule (12 CFR 217.33) currently assigns 0% to these commitments**, so
+  under the rules these banks actually report against, the whole $128.6bn
+  attracts no capital at all.
 - **22% of small US banks (195 of 887 over $1bn) report no risk-weighted assets
   at all.** They have elected the community bank leverage ratio under 12 CFR
   217.12, which switches off the entire risk-based capital apparatus. Basel
@@ -112,8 +132,11 @@ quietly proxied.
 | `src/params/symbols.py` | the closed symbol vocabulary |
 | `src/params/evaluate.py` | safe formula execution |
 | `src/analysis/portfolio.py` | tiering, composition, peer groups |
+| `src/ingest/callreport.py` | Call Report bulk -> per-bank year-end filings |
 | `run_phase1.py` | the whole thing |
 | `scripts/fetch_basel.sh` | downloads the BIS source documents |
+| `scripts/fetch_callreport.py` | drives the FFIEC CDR bulk-download form |
+| `annual_reports_2025/` | year-end 2025 filings for 50 small card banks |
 
 ## What is not in this repository, and why
 
@@ -124,5 +147,7 @@ quietly proxied.
   Basel Framework and permits brief excerpts only, so the full document and its
   complete text extraction are not redistributed. `scripts/fetch_basel.sh` plus
   the parser reproduce both in about three minutes.
-- **The FDIC quarterly panel.** Public domain but large and reproducible —
-  `src/ingest/fdic.py` rebuilds it.
+- **The FDIC quarterly panel and the Call Report bulk cycle.** Public domain but
+  large and reproducible — `src/ingest/fdic.py` and
+  `scripts/fetch_callreport.py` rebuild them. The 50 per-bank extracts in
+  `annual_reports_2025/` are committed, since they are the working dataset.
