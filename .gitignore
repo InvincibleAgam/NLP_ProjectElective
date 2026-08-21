@@ -23,3 +23,7 @@ outputs/phase1/
 *.parquet
 
 .DS_Store
+
+# Call Report bulk cycle (36MB extracted, regenerable via scripts/fetch_callreport.py)
+data/callreport_2025Q4/
+data/callreport*.zip
