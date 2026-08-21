@@ -107,9 +107,13 @@ split, IRB parameters, LCR inputs filed only above $100bn.
   committed**; Credit First National Association has $39m of assets against
   $11.4bn of committed lines. None of this is in the FDIC series that most
   small-bank analysis starts from; it is Call Report Schedule RC-L item 3815.
-  Converting it at Basel's 10% CCF for unconditionally cancellable commitments
-  (CRE20.100) and the 75% retail risk weight (CRE20.68) moves Comenity's CET1
-  ratio from 15.1% to 10.7%, and TCM Bank's from 20.9% to 14.0%.
+  Converting the undrawn lines at Basel's 10% CCF for unconditionally cancellable
+  commitments (CRE20.100) and the 75% retail risk weight (CRE20.68) costs Comenity
+  4.4 points of CET1 — 15.1% down to 10.7% — holding the rest of its book at
+  current treatment. A *full* Basel restatement lands at 13.0%, because Basel also
+  moves the drawn balances from the US flat 100% down to 75%. The two numbers
+  answer different questions: 10.7% isolates the exposure nobody currently counts,
+  13.0% is what Basel would actually require.
   **The US rule (12 CFR 217.33) currently assigns 0% to these commitments**, so
   under the rules these banks actually report against, the whole $128.6bn
   attracts no capital at all.

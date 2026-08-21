@@ -95,8 +95,15 @@ the drawn one, so that omission hides most of the exposure:
 Basel applies a **10% credit conversion factor** to commitments that are
 unconditionally cancellable at any time without notice (**CRE20.100**) — which is
 what a card line is — then the 75% regulatory-retail risk weight (**CRE20.68**).
-On that basis Comenity's 2025 CET1 ratio goes 15.1% → 10.7%, and TCM Bank's
-20.9% → 14.0%.
+Two figures follow, and they answer different questions. Converting the undrawn
+lines alone, holding the rest of the book at current treatment, takes Comenity's
+2025 CET1 ratio from 15.1% to **10.7%** — that isolates the exposure nobody
+currently counts. A full Basel restatement, which also moves the drawn balances
+from the US flat 100% to 75%, lands at **13.0%** — that is what Basel would
+actually require. Because the transactor split is unobservable (CRE20.66), the
+honest output is a band: 21.2% if every account were a transactor (45%), 13.0% at
+the 75% central case, 9.8% if the book failed the regulatory-retail criteria
+(100%).
 
 **The divergence to raise with the supervisor.** Basel's 10% CCF is part of the
 finalised standard. The current US rule, 12 CFR 217.33, assigns **0%** to
