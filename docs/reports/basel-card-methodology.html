@@ -1,0 +1,454 @@
+<title>The Undrawn Book</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,300..700;1,8..60,400&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+
+<style>
+:root{
+  --paper:#F4F5F8; --surface:#FFFFFF; --sunk:#ECEEF4;
+  --ink:#11141C; --ink-2:#3D4457; --ink-3:#6B7386;
+  --rule:#D6DAE4; --rule-2:#E6E9F0;
+  --accent:#26355C; --accent-soft:#E7EAF3;
+  --ok:#2F6B4F; --warn:#8A5E10; --crit:#8E2A2A;
+  --ok-bg:#E6EFEA; --warn-bg:#F5EEDD; --crit-bg:#F5E5E5;
+  --shadow:0 1px 2px rgba(17,20,28,.05),0 8px 24px -16px rgba(17,20,28,.25);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --paper:#0F1218; --surface:#161A23; --sunk:#1C2130;
+    --ink:#E5E8EF; --ink-2:#AEB6C6; --ink-3:#7E879B;
+    --rule:#2A3040; --rule-2:#222836;
+    --accent:#9DB0DE; --accent-soft:#1D2436;
+    --ok:#7FC3A0; --warn:#D9AC5C; --crit:#E08A8A;
+    --ok-bg:#16241D; --warn-bg:#2A2416; --crit-bg:#2A1919;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px -16px rgba(0,0,0,.7);
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#0F1218; --surface:#161A23; --sunk:#1C2130;
+  --ink:#E5E8EF; --ink-2:#AEB6C6; --ink-3:#7E879B;
+  --rule:#2A3040; --rule-2:#222836;
+  --accent:#9DB0DE; --accent-soft:#1D2436;
+  --ok:#7FC3A0; --warn:#D9AC5C; --crit:#E08A8A;
+  --ok-bg:#16241D; --warn-bg:#2A2416; --crit-bg:#2A1919;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px -16px rgba(0,0,0,.7);
+}
+
+*{box-sizing:border-box}
+body{
+  margin:0; background:var(--paper); color:var(--ink);
+  font-family:"Source Serif 4",Georgia,"Times New Roman",serif;
+  font-size:17px; line-height:1.65; font-optical-sizing:auto;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:1080px; margin:0 auto; padding:0 28px 96px}
+.col{max-width:68ch}
+
+/* ---- masthead ---- */
+header{border-bottom:1px solid var(--rule); padding:56px 0 28px; margin-bottom:44px}
+.eyebrow{
+  font-family:"IBM Plex Mono",ui-monospace,monospace; font-size:11.5px; font-weight:500;
+  letter-spacing:.14em; text-transform:uppercase; color:var(--ink-3); margin:0 0 18px;
+}
+h1{
+  font-size:clamp(34px,5.4vw,54px); line-height:1.06; font-weight:600; letter-spacing:-.02em;
+  margin:0 0 18px; text-wrap:balance;
+}
+.standfirst{font-size:20px; line-height:1.5; color:var(--ink-2); margin:0 0 28px; max-width:60ch}
+.meta{
+  display:flex; flex-wrap:wrap; gap:10px 28px;
+  font-family:"IBM Plex Sans",system-ui,sans-serif; font-size:13px; color:var(--ink-3);
+}
+.meta b{font-weight:600; color:var(--ink-2); font-variant-numeric:tabular-nums}
+
+/* ---- typography ---- */
+h2{
+  font-size:29px; line-height:1.18; font-weight:600; letter-spacing:-.015em;
+  margin:64px 0 6px; text-wrap:balance; scroll-margin-top:20px;
+}
+h2 .num{
+  font-family:"IBM Plex Mono",monospace; font-size:14px; font-weight:500; color:var(--accent);
+  display:block; margin-bottom:8px; letter-spacing:.08em;
+}
+h3{font-size:20px; font-weight:600; margin:36px 0 8px; letter-spacing:-.01em; text-wrap:balance}
+p{margin:0 0 18px}
+.lede{font-size:18.5px; color:var(--ink-2)}
+a{color:var(--accent); text-decoration:underline; text-underline-offset:2px; text-decoration-thickness:1px}
+a:focus-visible,summary:focus-visible{outline:2px solid var(--accent); outline-offset:3px; border-radius:2px}
+code,.mono{font-family:"IBM Plex Mono",ui-monospace,monospace; font-size:.88em}
+code{background:var(--sunk); padding:.12em .38em; border-radius:3px; color:var(--ink-2)}
+strong{font-weight:600}
+.sec-rule{height:1px; background:var(--rule); border:0; margin:0}
+
+/* ---- citation chip ---- */
+.cite{
+  font-family:"IBM Plex Mono",monospace; font-size:11.5px; font-weight:500;
+  color:var(--accent); background:var(--accent-soft);
+  padding:.18em .5em; border-radius:3px; white-space:nowrap;
+}
+
+/* ---- the five steps: citation rail ---- */
+.step{
+  display:grid; grid-template-columns:150px 1fr; gap:0 32px;
+  border-top:1px solid var(--rule-2); padding:26px 0;
+}
+.step:last-of-type{border-bottom:1px solid var(--rule-2)}
+.rail{font-family:"IBM Plex Mono",monospace; font-size:11.5px; line-height:1.75; color:var(--ink-3)}
+.rail .n{
+  display:inline-block; font-size:12px; font-weight:600; color:var(--surface);
+  background:var(--accent); width:22px; height:22px; line-height:22px; text-align:center;
+  border-radius:3px; margin-bottom:10px;
+}
+.rail ul{list-style:none; margin:0; padding:0}
+.rail li{margin-bottom:2px}
+.rail a{color:var(--accent); text-decoration:none}
+.rail a:hover{text-decoration:underline}
+.step h3{margin:0 0 8px}
+.step p{margin:0 0 12px}
+.step p:last-child{margin-bottom:0}
+.formula{
+  font-family:"IBM Plex Mono",monospace; font-size:13.5px; line-height:1.7;
+  background:var(--sunk); border-left:2px solid var(--accent);
+  padding:12px 16px; margin:0 0 14px; border-radius:0 3px 3px 0;
+  overflow-x:auto; color:var(--ink-2);
+}
+.formula b{color:var(--ink); font-weight:600}
+
+/* ---- tables ---- */
+.tw{overflow-x:auto; margin:0 0 8px; -webkit-overflow-scrolling:touch}
+table{
+  border-collapse:collapse; width:100%; min-width:520px;
+  font-family:"IBM Plex Sans",system-ui,sans-serif; font-size:14px;
+  font-variant-numeric:tabular-nums;
+}
+caption{
+  text-align:left; font-family:"IBM Plex Sans",sans-serif; font-size:12.5px; color:var(--ink-3);
+  padding:0 0 10px; line-height:1.5;
+}
+th,td{padding:9px 14px 9px 0; text-align:left; border-bottom:1px solid var(--rule-2)}
+/* a right-aligned column butting against the next left-aligned one leaves no
+   gutter, so the two headers read as one word */
+td.n+td,th.n+th{padding-left:18px}
+th{
+  font-size:11px; font-weight:600; letter-spacing:.08em; text-transform:uppercase;
+  color:var(--ink-3); border-bottom:1px solid var(--rule); padding-bottom:7px;
+}
+td.n,th.n{text-align:right; padding-right:0}
+tbody tr:last-child td{border-bottom:0}
+tr.hl td{background:var(--accent-soft)}
+tr.hl td:first-child{font-weight:600}
+.note{font-family:"IBM Plex Sans",sans-serif; font-size:12.5px; color:var(--ink-3); margin:6px 0 0; line-height:1.55}
+
+/* ---- pills ---- */
+.pill{
+  display:inline-block; font-family:"IBM Plex Sans",sans-serif; font-size:11px; font-weight:600;
+  letter-spacing:.04em; padding:.18em .55em; border-radius:3px; white-space:nowrap;
+}
+.p-ok{background:var(--ok-bg); color:var(--ok)}
+.p-warn{background:var(--warn-bg); color:var(--warn)}
+.p-crit{background:var(--crit-bg); color:var(--crit)}
+
+/* ---- callout ---- */
+.callout{
+  background:var(--surface); border:1px solid var(--rule); border-radius:5px;
+  padding:22px 26px; margin:26px 0; box-shadow:var(--shadow);
+}
+.callout h3{margin-top:0}
+.callout p:last-child{margin-bottom:0}
+.callout.flag{border-left:3px solid var(--warn)}
+
+/* ---- two-up ---- */
+.duo{display:grid; grid-template-columns:1fr 1fr; gap:28px; margin:24px 0}
+.panel{background:var(--surface); border:1px solid var(--rule); border-radius:5px; padding:20px 22px}
+.panel h3{margin:0 0 10px; font-size:16px}
+.panel ul{margin:0; padding-left:1.1em; font-size:15px; color:var(--ink-2)}
+.panel li{margin-bottom:6px}
+.stat{font-family:"IBM Plex Mono",monospace; font-size:30px; font-weight:600; letter-spacing:-.02em; color:var(--accent); display:block; line-height:1.1}
+.stat-l{font-family:"IBM Plex Sans",sans-serif; font-size:12px; color:var(--ink-3); letter-spacing:.03em}
+
+footer{border-top:1px solid var(--rule); margin-top:72px; padding-top:24px;
+  font-family:"IBM Plex Sans",sans-serif; font-size:13px; color:var(--ink-3)}
+
+/* ---- print / PDF ----
+   Paper is always light and always white, so the theme tokens are pinned here
+   rather than inherited from whatever the viewer's screen was set to. */
+@media print{
+  :root,:root[data-theme="dark"]{
+    --paper:#FFFFFF; --surface:#FFFFFF; --sunk:#F2F4F8;
+    --ink:#11141C; --ink-2:#3D4457; --ink-3:#666E82;
+    --rule:#C9CEDA; --rule-2:#E0E4EC;
+    --accent:#26355C; --accent-soft:#EDF0F7;
+    --ok:#2A6047; --warn:#7A5410; --crit:#7F2525;
+    --ok-bg:#EBF2EE; --warn-bg:#F7F1E3; --crit-bg:#F7EAEA;
+    --shadow:none;
+  }
+  @page{margin:15mm 13mm}
+  body{background:#fff; font-size:10.2pt; line-height:1.5}
+  .wrap{max-width:none; padding:0}
+  .col{max-width:none}
+  header{padding-top:0; margin-bottom:26px}
+  h1{font-size:30pt}
+  .standfirst{font-size:12.5pt}
+  /* break-after alone still lets a page break fall between the eyebrow and the
+     heading text, since both live inside the h2 */
+  h2{font-size:16pt; margin:26px 0 4px; break-after:avoid; page-break-after:avoid;
+     break-inside:avoid; page-break-inside:avoid}
+  h3{font-size:12pt; break-after:avoid; page-break-after:avoid; break-inside:avoid}
+  p{orphans:3; widows:3}
+  .step,.callout,.panel,.duo,figure,table,.tw{break-inside:avoid; page-break-inside:avoid}
+  .tw{overflow:visible}
+  table{min-width:0; font-size:9pt}
+  th,td{padding:6px 10px 6px 0}
+  td.n+td,th.n+th{padding-left:14px}
+  .callout,.panel{box-shadow:none}
+  a{color:var(--ink); text-decoration:none}
+  .rail a{color:var(--accent)}
+  footer{margin-top:32px}
+}
+
+@media (max-width:720px){
+  body{font-size:16px}
+  .wrap{padding:0 20px 64px}
+  .step{grid-template-columns:1fr; gap:14px}
+  .rail{display:flex; flex-wrap:wrap; gap:6px 14px; align-items:baseline}
+  .rail ul{display:flex; gap:10px; flex-wrap:wrap}
+  .rail .n{margin-bottom:0}
+  .duo{grid-template-columns:1fr; gap:18px}
+}
+</style>
+
+<div class="wrap">
+
+<header>
+  <p class="eyebrow">Methodology · Preliminary</p>
+  <h1>The Undrawn Book</h1>
+  <p class="standfirst">Applying Basel III credit-card rules to the quarterly regulatory filings of 50 small US banks — and why most of the exposure sits where nobody currently counts it.</p>
+  <div class="meta">
+    <span><b>3,682</b> Basel paragraphs parsed</span>
+    <span><b>673</b> rules extracted, all grounded</span>
+    <span><b>600</b> bank-quarters computed</span>
+    <span><b>2023 Q1 – 2025 Q4</b></span>
+  </div>
+</header>
+
+<div class="col">
+<p class="lede">The brief asks for four things in order: extract the rules, classify them, derive parameters from them, then find those parameters in banks' quarterly reports. This document covers that chain as it now stands, end to end, with a worked example. Everything described here runs — the figures below are produced by the code, not estimated.</p>
+</div>
+
+<h2><span class="num">01 — Inputs</span>Two corpora, and the join between them</h2>
+<div class="col">
+<p>The project needs a regulatory side and a bank side, and the difficulty the supervisor identified is real: the quarterly report is structured, but it is not written in the vocabulary of the rules.</p>
+</div>
+
+<div class="duo">
+  <div class="panel">
+    <h3>Regulatory side</h3>
+    <ul>
+      <li>BIS consolidated Basel Framework, 1,982 pages, parsed to <strong>3,682 paragraphs</strong>, each keeping its real citation (<code>CRE20.68</code>) and heading path.</li>
+      <li><strong>673 rules</strong> extracted across 23 chapters — 367 with a number in them, 144 bearing on cards.</li>
+      <li>Classified by kind: capital, liquidity, credit-risk RWA, concentration, provisioning, issuance, disclosure.</li>
+    </ul>
+  </div>
+  <div class="panel">
+    <h3>Bank side</h3>
+    <ul>
+      <li>FFIEC Call Reports — the mandatory quarterly filing — pulled from the CDR bulk distribution.</li>
+      <li><strong>50 banks × 12 quarters = 600 filings</strong>, complete panel, no gaps.</li>
+      <li>Small banks: under $10bn in assets, the community bank leverage-ratio threshold. Median $4.1bn.</li>
+      <li>Each filing is ~1,750 fields keyed by MDRM code (<code>RCON3815</code>).</li>
+    </ul>
+  </div>
+</div>
+
+<div class="col">
+<h3>The join</h3>
+<p>A rule cites a Basel paragraph; a filing reports an MDRM code. The bridge is a fixed vocabulary of named quantities, each bound to specific codes — so a formula written against a rule is executable against a filing. A formula naming <code>EAD_transactor</code> cannot be run against anything; one naming <code>credit_card_balances</code> resolves to <code>RCFDB538</code> or <code>RCONB538</code> and produces a number.</p>
+</div>
+
+<h2><span class="num">02 — Method</span>Five steps, each resting on a cited rule</h2>
+<div class="col">
+<p>The steps are a genuine sequence: each consumes the previous one's output. The rail on the left of each step names the provisions it rests on.</p>
+</div>
+
+<div class="step">
+  <div class="rail">
+    <span class="n">1</span>
+    <ul><li>CRE20.94</li><li>CRE20.100</li><li>12 CFR 217.33</li></ul>
+  </div>
+  <div>
+    <h3>Exposure at default</h3>
+    <p>Basel converts off-balance-sheet commitments into credit-equivalent exposure with a credit conversion factor. A commitment that is <em>unconditionally cancellable at any time without prior notice</em> takes a <strong>10% CCF</strong> — which is exactly what a credit-card line is.</p>
+    <div class="formula">EAD = drawn + undrawn × CCF<br><b>Comenity:</b> $6.76bn + $37.77bn × 0.10 = <b>$10.53bn</b></div>
+    <p>The same undrawn lines take a <strong>0% CCF</strong> under the US rule in force today, so they contribute nothing to reported exposure.</p>
+  </div>
+</div>
+
+<div class="step">
+  <div class="rail">
+    <span class="n">2</span>
+    <ul><li>CRE20.65</li><li>CRE20.66</li><li>CRE20.68</li><li>12 CFR 217.32</li></ul>
+  </div>
+  <div>
+    <h3>Risk weight</h3>
+    <p>Credit cards are named explicitly in Basel's "regulatory retail" product criterion, so the book qualifies subject to a €1m per-counterparty ceiling and a 0.2% granularity limit. The weight then turns on whether the obligor is a <em>transactor</em> — someone who repaid in full at every scheduled date for twelve months.</p>
+    <div class="formula"><b>45%</b> transactor · <b>75%</b> regulatory retail, non-transactor · <b>100%</b> other retail</div>
+    <p>No US regulatory report collects the transactor split. The output is therefore a <strong>band across all three weights</strong>, not a point estimate — with 75% reported as central, since a bank that cannot demonstrate transactor status cannot claim 45%.</p>
+  </div>
+</div>
+
+<div class="step">
+  <div class="rail">
+    <span class="n">3</span>
+    <ul><li>RBC20.1</li><li>RBC30.2</li><li>RC-R <code>P859</code></li><li>RC-R <code>A223</code></li></ul>
+  </div>
+  <div>
+    <h3>Capital adequacy</h3>
+    <p>The card book's Basel RWA replaces its US contribution in the bank's reported total, and the restated ratio is tested against the minimum and the buffer.</p>
+    <div class="formula">RWA′ = RWA_reported − (drawn × 100%) + (EAD × rw)<br>test <b>CET1 ≥ 4.5%</b> (minimum) and <b>≥ 7.0%</b> (with the 2.5% conservation buffer)</div>
+    <p>Falling into the buffer range constrains capital distributions rather than breaching the minimum, so the two thresholds are reported separately.</p>
+  </div>
+</div>
+
+<div class="step">
+  <div class="rail">
+    <span class="n">4</span>
+    <ul><li>LCR40.64</li><li>RC <code>0071</code>/<code>0081</code></li><li>RC <code>1773</code>, <code>JJ34</code></li></ul>
+  </div>
+  <div>
+    <h3>Liquidity stress</h3>
+    <p>Basel's LCR assumes a <strong>5% drawdown</strong> within thirty days on undrawn committed facilities to retail and small-business customers. Set against the bank's cash, securities and money-market placements, this is the supervisor's own worked example made computable: <em>can the bank fund the lines it has already promised?</em></p>
+    <div class="formula">cover = liquid assets ÷ (undrawn × 0.05)<br><b>Comenity:</b> $1.23bn ÷ $1.89bn = <b>0.65×</b></div>
+    <p>This is an <em>analytical stress</em>, not a compliance test — the US LCR rule does not reach banks of this size. That distinction is stated wherever the number appears.</p>
+  </div>
+</div>
+
+<div class="step">
+  <div class="rail">
+    <span class="n">5</span>
+    <ul><li>RC-N <code>B575</code>/<code>B576</code></li><li>RI-B <code>B514</code>/<code>B515</code></li><li>RI <code>B485</code></li><li>RC-K <code>B561</code></li></ul>
+  </div>
+  <div>
+    <h3>Credit quality and economics</h3>
+    <p>Delinquency, loss rate, portfolio yield and allowance coverage — computed against the <em>average</em> balance rather than period-end, since income items are flows.</p>
+    <div class="formula"><b>Comenity:</b> 30–89 days <b>3.4%</b> · 90+ days <b>3.6%</b> · net charge-offs <b>7.0%</b> · yield <b>26.8%</b> · allowance/drawn <b>11.4%</b></div>
+    <p>These are the inputs to the performance criterion the brief asks us to define, and they are what a redistribution proposal has to preserve.</p>
+  </div>
+</div>
+
+<h2><span class="num">03 — Worked example</span>Comenity Bank, year-end 2025</h2>
+<div class="col">
+<p>A $7.8bn Delaware bank whose loan book is 100% credit cards — and whose committed but undrawn lines are five times its balance sheet.</p>
+</div>
+
+<div class="tw">
+<table>
+  <caption>Same bank, same filing, four regulatory treatments. All figures computed from the 2025-12-31 Call Report.</caption>
+  <thead><tr>
+    <th>Treatment</th><th class="n">EAD</th><th class="n">Card RWA</th><th class="n">Total RWA</th><th class="n">CET1 ratio</th><th>Status</th>
+  </tr></thead>
+  <tbody>
+    <tr><td>US rule in force today</td><td class="n">$6.76bn</td><td class="n">$6.76bn</td><td class="n">$6.98bn</td><td class="n">15.1%</td><td><span class="pill p-ok">above buffer</span></td></tr>
+    <tr><td>Basel @ 45% — all transactors</td><td class="n">$10.53bn</td><td class="n">$4.74bn</td><td class="n">$4.96bn</td><td class="n">21.2%</td><td><span class="pill p-ok">above buffer</span></td></tr>
+    <tr class="hl"><td>Basel @ 75% — central case</td><td class="n">$10.53bn</td><td class="n">$7.90bn</td><td class="n">$8.12bn</td><td class="n">13.0%</td><td><span class="pill p-ok">above buffer</span></td></tr>
+    <tr><td>Basel @ 100% — other retail</td><td class="n">$10.53bn</td><td class="n">$10.53bn</td><td class="n">$10.76bn</td><td class="n">9.8%</td><td><span class="pill p-ok">above buffer</span></td></tr>
+  </tbody>
+</table>
+</div>
+<p class="note">A separate figure answers a different question: converting the undrawn lines alone, while leaving the drawn book at its current US treatment, gives <strong>10.7%</strong>. That isolates the exposure nobody counts today. The 13.0% row is what Basel would actually require, because Basel also moves the drawn balances from 100% down to 75%.</p>
+
+<div class="callout">
+  <h3>What the example demonstrates</h3>
+  <p>The bank is comfortably capitalised on every measure — and its liquidity cover on its own committed lines is <strong>0.65×</strong>. The binding constraint is not capital. It is that a 5% drawdown of promises already made would exhaust the cash and securities on hand. That is the question the supervisor posed, answered with the bank's own filing.</p>
+</div>
+
+<h2><span class="num">04 — Coverage</span>Across all 50 banks</h2>
+
+<div class="tw">
+<table>
+  <caption>Selected results at 2025-12-31. Ordinary community banks barely move — their card books are small. The specialists move enormously.</caption>
+  <thead><tr>
+    <th>Bank</th><th class="n">Assets</th><th class="n">Undrawn lines</th><th class="n">CET1 reported</th><th class="n">Basel @ 75%</th><th class="n">Liquidity cover</th>
+  </tr></thead>
+  <tbody>
+    <tr><td>Credit First NA</td><td class="n">$0.04bn</td><td class="n">$11.44bn</td><td class="n">387.7%</td><td class="n"><span class="pill p-crit">4.3%</span></td><td class="n">0.06×</td></tr>
+    <tr><td>Comenity Bank</td><td class="n">$7.76bn</td><td class="n">$37.77bn</td><td class="n">15.1%</td><td class="n">13.0%</td><td class="n">0.65×</td></tr>
+    <tr><td>John Deere Financial</td><td class="n">$3.40bn</td><td class="n">$33.50bn</td><td class="n">—</td><td class="n"><span class="pill p-warn">CBLR</span></td><td class="n">0.00×</td></tr>
+    <tr><td>Credit One Bank</td><td class="n">$1.97bn</td><td class="n">$8.11bn</td><td class="n">—</td><td class="n"><span class="pill p-warn">CBLR</span></td><td class="n">0.53×</td></tr>
+    <tr><td>Nicolet National Bank</td><td class="n">$9.17bn</td><td class="n">$0.14bn</td><td class="n">11.2%</td><td class="n">11.1%</td><td class="n">—</td></tr>
+    <tr><td>Peoples Bank</td><td class="n">$9.64bn</td><td class="n">$0.09bn</td><td class="n">12.0%</td><td class="n">12.0%</td><td class="n">—</td></tr>
+  </tbody>
+</table>
+</div>
+
+<div class="duo">
+  <div class="panel">
+    <span class="stat">6 / 49</span>
+    <span class="stat-l">banks cannot cover a 5% drawdown of their own committed card lines from cash and securities</span>
+  </div>
+  <div class="panel">
+    <span class="stat">11.9 → 14.3%</span>
+    <span class="stat-l">line utilisation across the cohort, 2023 to 2025, while committed capacity stayed flat at ~$130bn</span>
+  </div>
+</div>
+
+<h2><span class="num">05 — Limits</span>What is not computable, and why that matters</h2>
+<div class="col">
+<p>The most useful output of a data-grounded method is an honest account of where it stops. Three limits are structural, not fixable by better engineering, and each is a finding in its own right.</p>
+</div>
+
+<div class="tw">
+<table>
+  <caption>Availability of the quantities Basel's card rules require, across the 50 banks at 2025-12-31.</caption>
+  <thead><tr><th>Quantity</th><th>Source</th><th class="n">Coverage</th><th>Consequence</th></tr></thead>
+  <tbody>
+    <tr><td>Unused card lines</td><td><code>RC-L 3815</code></td><td class="n">49 / 50</td><td><span class="pill p-ok">usable</span></td></tr>
+    <tr><td>Card balances</td><td><code>RC-C B538</code></td><td class="n">45 / 50</td><td><span class="pill p-ok">usable</span></td></tr>
+    <tr><td>Card interest income</td><td><code>RI B485</code></td><td class="n">43 / 50</td><td><span class="pill p-ok">usable</span></td></tr>
+    <tr><td>Delinquency 30–89 / 90+</td><td><code>RC-N B575/B576</code></td><td class="n">37 / 26</td><td><span class="pill p-warn">partial</span></td></tr>
+    <tr><td>Risk-weighted assets</td><td><code>RC-R A223</code></td><td class="n">42 / 50</td><td><span class="pill p-warn">8 CBLR filers report none</span></td></tr>
+    <tr><td>Transactor / revolver split</td><td>—</td><td class="n">0 / 50</td><td><span class="pill p-crit">not collected anywhere</span></td></tr>
+    <tr><td>Card book by PD band</td><td><code>RC-O N040–N054</code></td><td class="n">0 / 50</td><td><span class="pill p-crit">large filers only</span></td></tr>
+    <tr><td>HQLA, net 30-day outflows</td><td>FR 2052a</td><td class="n">0 / 50</td><td><span class="pill p-crit">$100bn+ filers only</span></td></tr>
+  </tbody>
+</table>
+</div>
+
+<div class="col">
+<h3>Why each limit is itself a result</h3>
+<p><strong>The transactor split decides Basel's headline retail weight and no one collects it.</strong> A rule that turns on an unobservable is unenforceable from outside the issuer — which is why the output is a band.</p>
+<p><strong>Eight of fifty banks report no risk-weighted assets at all.</strong> Having elected the community bank leverage ratio, they are outside the risk-based framework entirely. Basel's risk weights are not hard to check for them; they do not apply. That is the supervisor's own point — requirements scale with size — showing up as missing data.</p>
+<p><strong>The data that would permit a proper risk segmentation exists, and small banks are exempt from reporting it.</strong> Schedule RC-O buckets the card book by two-year probability of default; it is blank for every bank under $10bn. So the analysis must use the standardised approach, not the internal-ratings approach.</p>
+</div>
+
+<div class="callout flag">
+  <h3>The divergence to settle before the next phase</h3>
+  <p>Basel and the US rule disagree on precisely the provisions this project centres on. Basel splits regulatory retail 45%/75% by transactor status; the US applies a flat 100% and does not recognise the split. Basel converts unconditionally cancellable commitments at 10%; the US converts them at 0% — so the <strong>$128.6bn</strong> of undrawn card lines across these 50 banks attracts no capital at all under the rules they actually report against.</p>
+  <p>Applying Basel literally to Call Report data will therefore not reproduce any US bank's published ratios. The question for you: extract Basel as specified, the US implementation the filings reflect, or both with an explicit divergence map? The third is more work and is the only one that makes the comparison defensible.</p>
+</div>
+
+<h2><span class="num">06 — Assurance</span>How we know the numbers are right</h2>
+<div class="col">
+<p><strong>Rules are grounded mechanically.</strong> Every extracted rule carries a quotation that must appear character-for-character in the paragraph it cites, checked by exact substring match. No model is asked whether a quote is faithful, so no model can be wrong about it. All 673 rules pass; those that fail are dropped, not repaired.</p>
+<p><strong>Field mappings are cross-validated.</strong> The CET1 ratio computed from our own mapping reproduces the ratio each bank reports itself. Where it did not, the mapping was wrong and was fixed.</p>
+<p><strong>Regulatory assumptions are tested against the data, not asserted.</strong> Comenity's reported RWA divided by its drawn balances is 1.03 — RWA is essentially the drawn book at 100%, and $37.8bn of undrawn lines contributes nothing. That confirms the US 0% conversion factor empirically rather than on the strength of a citation.</p>
+<p><strong>Implausible results are chased, not shipped.</strong> John Deere Financial appeared to hold zero liquid assets; the cause was a field that not every bank files, and correcting it changed the population failing the liquidity stress from seven banks to six.</p>
+</div>
+
+<div class="callout flag">
+  <h3>Status of the US-side claims</h3>
+  <p>The Basel citations above are drawn from the parsed framework and are checked. The claims about the US rule — the 0% conversion factor, the flat 100% retail weight, the $10bn and $100bn thresholds — are stated from the regulation but a verification pass against the Code of Federal Regulations is still running. US adoption of the Basel III endgame has been proposed and revised repeatedly, so <em>in force today</em> versus <em>proposed</em> needs confirming before these go into anything final.</p>
+</div>
+
+<h2><span class="num">07 — Next</span>What this sets up</h2>
+<div class="col">
+<p>Steps 1–5 produce a comparable, rule-grounded profile for every bank in every quarter. That is the input the rest of the brief needs.</p>
+<p><strong>Performance criterion and ranking.</strong> Yield, loss rate, capital headroom and liquidity cover are all computed; what remains is choosing and defending a weighting, then ranking within the size tier.</p>
+<p><strong>Benchmark and redistribute.</strong> The cohort is already usefully split — Comenity withdrew $14.2bn of committed lines over three years while Merrick grew its book 93%. Those are opposed strategies at comparable scale, which is better material than a peer group that all behaves alike.</p>
+<p><strong>Scenarios.</strong> The five steps are the objective function a scenario perturbs: a utilisation shock moves step 1, a migration to "other retail" moves step 2, a funding shock moves step 4. Each is bounded by something observed in the panel, which is the plausibility check the brief requires.</p>
+</div>
+
+<footer>
+  <p>Preliminary methodology · Basel III applied to small-bank credit-card portfolios · Sources: BIS consolidated Basel Framework; FFIEC Call Reports via the CDR public bulk distribution, 2023 Q1 – 2025 Q4. All figures computed from the filings; monetary amounts in US dollars.</p>
+</footer>
+
+</div>
