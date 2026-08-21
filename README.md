@@ -46,12 +46,17 @@ python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
 .venv/bin/python src/ingest/fdic.py --latest 20260331 --quarters 12 \
         --min-assets 1000000
 
-# 2b. year-end Call Reports — carries the off-balance-sheet schedules the
-#     FDIC series omits, chiefly RC-L item 3815 (unused credit-card lines)
-.venv/bin/python scripts/fetch_callreport.py --date 12/31/2025 \
-        --out data/callreport.zip
-unzip -q data/callreport.zip -d data/callreport_2025Q4
-.venv/bin/python src/ingest/callreport.py      # -> annual_reports_2025/
+# 2b. Call Reports — carry the off-balance-sheet schedules the FDIC series
+#     omits, chiefly RC-L item 3815 (unused credit-card lines). One run per
+#     quarter; `--list` shows what CDR offers.
+for d in 03/31/2023 06/30/2023 09/30/2023 12/31/2023 \
+         03/31/2024 06/30/2024 09/30/2024 12/31/2024 \
+         03/31/2025 06/30/2025 09/30/2025 12/31/2025; do
+  iso=$(echo $d | awk -F/ '{printf "%s-%s-%s",$3,$1,$2}')
+  .venv/bin/python scripts/fetch_callreport.py --date $d --out data/cr.zip
+  unzip -qo data/cr.zip -d data/callreport/$iso && rm data/cr.zip
+done
+.venv/bin/python src/ingest/callreport.py     # -> bank_filings_2023_2025/
 
 # 3. query the corpus
 .venv/bin/python src/rag/corpus.py --search "undrawn credit card commitments" -k 8
@@ -88,6 +93,13 @@ split, IRB parameters, LCR inputs filed only above $100bn.
 
 ## Findings that change the brief
 
+- **Committed card capacity is flat while drawdown climbs.** Across the 50 small
+  banks over twelve quarters, unused card commitments went $131.5bn (2023) →
+  $128.6bn (2025) while line utilisation rose **11.9% → 14.3%**. Drawn balances
+  grew 21% over the same period, which read on its own looks like healthy
+  origination; set against static committed lines it reads as customers drawing
+  down capacity they already had. The sector is also splitting — Comenity pulled
+  $14.2bn of lines (−27%) while Merrick added 93% and Credit One 26%.
 - **For small card banks the binding exposure is off balance sheet, and the usual
   data source cannot see it.** Across the 50 small banks with the largest card
   businesses, undrawn credit-card commitments total **$128.6bn** — several times
@@ -132,11 +144,11 @@ split, IRB parameters, LCR inputs filed only above $100bn.
 | `src/params/symbols.py` | the closed symbol vocabulary |
 | `src/params/evaluate.py` | safe formula execution |
 | `src/analysis/portfolio.py` | tiering, composition, peer groups |
-| `src/ingest/callreport.py` | Call Report bulk -> per-bank year-end filings |
+| `src/ingest/callreport.py` | Call Report bulk -> per-bank filing histories |
 | `run_phase1.py` | the whole thing |
 | `scripts/fetch_basel.sh` | downloads the BIS source documents |
 | `scripts/fetch_callreport.py` | drives the FFIEC CDR bulk-download form |
-| `annual_reports_2025/` | year-end 2025 filings for 50 small card banks |
+| `bank_filings_2023_2025/` | 50 small card banks × 12 quarters of Call Reports |
 
 ## What is not in this repository, and why
 
@@ -149,5 +161,5 @@ split, IRB parameters, LCR inputs filed only above $100bn.
   the parser reproduce both in about three minutes.
 - **The FDIC quarterly panel and the Call Report bulk cycle.** Public domain but
   large and reproducible — `src/ingest/fdic.py` and
-  `scripts/fetch_callreport.py` rebuild them. The 50 per-bank extracts in
-  `annual_reports_2025/` are committed, since they are the working dataset.
+  `scripts/fetch_callreport.py` rebuild them. The 50-bank extracts in
+  `bank_filings_2023_2025/` are committed, since they are the working dataset.
