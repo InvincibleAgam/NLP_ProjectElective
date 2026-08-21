@@ -24,6 +24,8 @@ outputs/phase1/
 
 .DS_Store
 
-# Call Report bulk cycle (36MB extracted, regenerable via scripts/fetch_callreport.py)
-data/callreport_2025Q4/
+# Call Report bulk cycles (~430MB extracted across 12 quarters, regenerable via
+# scripts/fetch_callreport.py). The 50-bank extracts in bank_filings_2023_2025/
+# are committed, since they are the working dataset.
+data/callreport/
 data/callreport*.zip
