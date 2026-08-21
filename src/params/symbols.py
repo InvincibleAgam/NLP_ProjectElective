@@ -6,12 +6,15 @@ extraction produces formulas; the bank connector produces numbers; they only
 meet if both sides agree on a fixed set of names. Free-form formulas invented per
 rule are not executable, so parameterisation is constrained to these symbols.
 
-Three availability states, and the third is the interesting one:
+Four availability states, and the last is the interesting one:
 
   AVAILABLE    read directly from the FDIC quarterly series
   DERIVED      computed from available symbols
-  UNAVAILABLE  the Basel rule needs it, and a small US bank's published
-               quarterly filing does not contain it
+  CALLREPORT   not in the FDIC series, but filed on a Call Report schedule and
+               obtainable from the FFIEC CDR bulk distribution (see
+               `ingest.callreport`); resolved when a Call Report record is passed
+               alongside the FDIC row
+  UNAVAILABLE  the Basel rule needs it, and no public filing carries it
 
 `UNAVAILABLE` symbols are declared here on purpose rather than omitted. A rule
 that depends on one is not dropped — it is carried with an explicit,
@@ -26,6 +29,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 AVAILABLE, DERIVED, UNAVAILABLE = "available", "derived", "unavailable"
+CALLREPORT = "callreport"
 
 
 @dataclass(frozen=True)
@@ -35,13 +39,16 @@ class Symbol:
     availability: str
     fdic_field: str | None = None
     formula: str | None = None            # for DERIVED
-    call_report: str | None = None        # where an UNAVAILABLE one lives
+    call_report: str | None = None        # where an UNAVAILABLE/CALLREPORT one lives
+    mdrm: tuple[str, ...] = ()            # MDRM codes, for CALLREPORT symbols
     unit: str = "usd_thousands"
 
 
 def _a(n, d, f, unit="usd_thousands"): return Symbol(n, d, AVAILABLE, fdic_field=f, unit=unit)
 def _d(n, d, formula, unit="usd_thousands"): return Symbol(n, d, DERIVED, formula=formula, unit=unit)
 def _u(n, d, src, unit="usd_thousands"): return Symbol(n, d, UNAVAILABLE, call_report=src, unit=unit)
+def _c(n, d, src, mdrm, unit="usd_thousands"):
+    return Symbol(n, d, CALLREPORT, call_report=src, mdrm=mdrm, unit=unit)
 
 
 SYMBOLS: dict[str, Symbol] = {s.name: s for s in [
@@ -108,15 +115,28 @@ SYMBOLS: dict[str, Symbol] = {s.name: s for s in [
        "net_chargeoffs_ytd / gross_loans", unit="ratio"),
     _d("coverage_ratio", "Allowance over noncurrent loans",
        "allowance_credit_losses / noncurrent_loans", unit="ratio"),
+    _d("total_card_exposure", "Drawn card balances plus committed undrawn lines",
+       "credit_card_balances + undrawn_credit_card_lines"),
+    _d("card_line_utilisation", "Drawn share of total committed card lines",
+       "credit_card_balances / (credit_card_balances + undrawn_credit_card_lines)",
+       unit="ratio"),
 
-    # ---- declared but NOT in the published series -------------------------
-    _u("undrawn_credit_card_lines",
+    # ---- filed on a Call Report schedule, absent from the FDIC series ------
+    _c("undrawn_credit_card_lines",
        "Unused commitments on credit card lines — the exposure Basel converts "
-       "with a CCF, and the quantity the supervisor's worked example turns on",
-       "Call Report Schedule RC-L, item RCFD/RCON 3815"),
-    _u("undrawn_commitments_other",
-       "Other unused commitments (HELOC, C&I, CRE)",
-       "Call Report Schedule RC-L, items 1.a-1.e"),
+       "with a CCF, and the quantity the supervisor's worked example turns on. "
+       "For small card banks it routinely exceeds the drawn book several times "
+       "over, and it is absent from the FDIC series.",
+       "Call Report Schedule RC-L, item 3815", ("RCFD3815", "RCON3815")),
+    _c("undrawn_commitments_other",
+       "Other unused revolving commitments (HELOC and similar)",
+       "Call Report Schedule RC-L, item 3814", ("RCFD3814", "RCON3814")),
+    _c("credit_card_loans_cr", "Credit-card loans as filed on Schedule RC-C",
+       "Call Report Schedule RC-C Part I, item B538", ("RCFDB538", "RCONB538")),
+    _c("other_revolving_plans", "Other revolving credit plan loans",
+       "Call Report Schedule RC-C Part I, item B539", ("RCFDB539", "RCONB539")),
+
+    # ---- declared but NOT in any public filing ----------------------------
     _u("credit_card_transactor_balances",
        "Balances of obligors who repay in full each cycle — determines the "
        "45% vs 75% Basel retail risk weight",
@@ -143,7 +163,7 @@ SYMBOLS: dict[str, Symbol] = {s.name: s for s in [
 
 BY_AVAILABILITY = {
     k: [s.name for s in SYMBOLS.values() if s.availability == k]
-    for k in (AVAILABLE, DERIVED, UNAVAILABLE)
+    for k in (AVAILABLE, DERIVED, CALLREPORT, UNAVAILABLE)
 }
 
 
@@ -152,7 +172,7 @@ def catalogue_markdown() -> str:
     rows = ["| symbol | availability | unit | source | description |",
             "| --- | --- | --- | --- | --- |"]
     for s in SYMBOLS.values():
-        src = s.fdic_field or s.formula or s.call_report or ""
+        src = s.fdic_field or s.formula or "/".join(s.mdrm) or s.call_report or ""
         rows.append(f"| `{s.name}` | {s.availability} | {s.unit} | {src} | {s.description} |")
     return "\n".join(rows)
 

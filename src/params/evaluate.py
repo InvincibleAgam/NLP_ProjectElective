@@ -18,7 +18,7 @@ import operator as op
 from dataclasses import dataclass, field
 from typing import Any
 
-from symbols import AVAILABLE, DERIVED, SYMBOLS, UNAVAILABLE  # noqa: F401
+from symbols import AVAILABLE, CALLREPORT, DERIVED, SYMBOLS, UNAVAILABLE  # noqa: F401
 
 _BIN = {ast.Add: op.add, ast.Sub: op.sub, ast.Mult: op.mul,
         ast.Div: op.truediv, ast.Pow: op.pow, ast.Mod: op.mod}
@@ -61,13 +61,33 @@ def evaluate_expression(expr: str, env: dict[str, float]) -> float:
     return _eval(ast.parse(expr.strip(), mode="eval"), env)
 
 
-def build_env(row: dict[str, Any]) -> dict[str, float | None]:
-    """Symbol table for one bank-quarter: FDIC fields, then derived symbols."""
+def _clean(v) -> float | None:
+    if v is None or v == "" or v == "CONF":
+        return None
+    try:
+        f = float(v)
+    except (TypeError, ValueError):
+        return None
+    return None if math.isnan(f) else f
+
+
+def build_env(row: dict[str, Any],
+              call_report: dict[str, Any] | None = None) -> dict[str, float | None]:
+    """Symbol table for one bank-quarter.
+
+    `row` is an FDIC record. `call_report` is optional: a mapping of MDRM code to
+    filed value, as produced by `ingest.callreport`. Supplying it resolves the
+    symbols the FDIC series omits — chiefly undrawn credit-card lines, without
+    which no off-balance-sheet constraint can be evaluated at all.
+    """
     env: dict[str, float | None] = {}
     for s in SYMBOLS.values():
         if s.availability == AVAILABLE:
-            v = row.get(s.fdic_field)
-            env[s.name] = None if v is None or (isinstance(v, float) and math.isnan(v)) else float(v)
+            env[s.name] = _clean(row.get(s.fdic_field))
+        elif s.availability == CALLREPORT:
+            env[s.name] = next(
+                (v for v in (_clean((call_report or {}).get(c)) for c in s.mdrm)
+                 if v is not None), None)
         elif s.availability == UNAVAILABLE:
             env[s.name] = None
 
