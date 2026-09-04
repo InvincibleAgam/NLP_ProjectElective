@@ -152,6 +152,55 @@ h2{font-size:27px; font-weight:600; letter-spacing:-.02em; margin:0 0 10px; text
 .empty{color:var(--ink-3); font-style:italic; max-width:64ch}
 mark{background:var(--warn-bg); color:inherit; padding:0 1px; border-radius:2px}
 
+/* ---------- view tabs ---------- */
+.tabs{display:flex; gap:2px; background:var(--sunk); padding:2px; border-radius:5px}
+.tab{
+  font-family:"IBM Plex Sans",sans-serif; font-size:12.5px; font-weight:500;
+  background:none; border:0; color:var(--ink-3); cursor:pointer;
+  padding:5px 13px; border-radius:4px;
+}
+.tab[aria-selected="true"]{background:var(--surface); color:var(--ink); font-weight:600}
+.tab:focus-visible{outline:2px solid var(--accent-line); outline-offset:1px}
+.toggle{
+  font-family:"IBM Plex Sans",sans-serif; font-size:12.5px; color:var(--ink-3);
+  display:flex; align-items:center; gap:6px; cursor:pointer; user-select:none;
+}
+.toggle input{accent-color:var(--accent); margin:0}
+
+/* ---------- literal tree ---------- */
+#overview{overflow-y:auto; padding:22px 30px 80px; display:none}
+#overview.on{display:block}
+.ovhead{max-width:70ch; margin:0 0 22px}
+.ovhead h2{font-size:24px; margin:0 0 8px}
+.ovhead p{color:var(--ink-2); margin:0; font-size:16px}
+.ltree{
+  font-family:"IBM Plex Mono",ui-monospace,monospace; font-size:12.5px; line-height:1.85;
+  white-space:nowrap; overflow-x:auto; padding-bottom:20px;
+}
+.tline{display:flex; align-items:baseline; gap:0; border-radius:3px}
+.tline.node{cursor:pointer}
+.tline.node:hover{background:var(--hover)}
+.guide{color:var(--ink-3); opacity:.5; flex:0 0 auto; white-space:pre}
+.lbl{color:var(--ink); font-weight:500; flex:0 0 auto}
+.tline.d1 .lbl{font-weight:600}
+.dots{flex:1 1 auto; min-width:24px; border-bottom:1px dotted var(--rule); margin:0 8px 4px}
+.cnt{color:var(--ink-3); flex:0 0 auto; font-variant-numeric:tabular-nums}
+.st{color:var(--warn); flex:0 0 auto; margin-left:10px; font-size:11px}
+.tline.rule1 .lbl{color:var(--ink-2); font-weight:400}
+.tline.rule1 .dots{border-bottom-color:transparent}
+.tline.rule1 .cnt{color:var(--accent)}
+.bul{color:var(--accent-line); flex:0 0 auto; white-space:pre}
+.numv{color:var(--ok); flex:0 0 auto; margin-left:10px}
+
+@media print{
+  header .tabs,header .search,header .toggle{display:none !important}
+  #overview{display:block !important; overflow:visible; padding:0}
+  .body{display:none !important}
+  .app{height:auto}
+  .ltree{font-size:8.5pt; line-height:1.6; white-space:pre-wrap; overflow:visible}
+  .tline{break-inside:avoid}
+}
+
 @media (max-width:880px){
   .body{grid-template-columns:1fr; grid-template-rows:minmax(180px,34vh) 1fr}
   nav{border-right:0; border-bottom:1px solid var(--rule)}
@@ -165,8 +214,20 @@ mark{background:var(--warn-bg); color:inherit; padding:0 1px; border-radius:2px}
   <header>
     <h1>Basel Rule Atlas</h1>
     <p class="sub" id="sub"></p>
+    <div class="tabs" role="tablist">
+      <button class="tab" id="tab-ov" role="tab" aria-selected="true" type="button">Whole tree</button>
+      <button class="tab" id="tab-ex" role="tab" aria-selected="false" type="button">Explore</button>
+    </div>
+    <label class="toggle" id="rulesToggle"><input type="checkbox" id="showRules" checked> rule lines</label>
     <input class="search" id="q" type="search" placeholder="Search rules and branches…" autocomplete="off">
   </header>
+  <section id="overview" class="on">
+    <div class="ovhead">
+      <h2>The whole tree, in one page</h2>
+      <p>Every branch of the framework and every rule on it, as a single line each. Untick <em>rule lines</em> for the bare skeleton; click any branch to open it in the explorer.</p>
+    </div>
+    <div class="ltree" id="ltree"></div>
+  </section>
   <div class="body">
     <nav id="tree" aria-label="Rule taxonomy"></nav>
     <main id="detail" tabindex="-1"></main>
@@ -321,5 +382,70 @@ q.addEventListener('input', () => {
   });
 });
 
-select(location.hash.slice(1) && byId[location.hash.slice(1)] ? location.hash.slice(1) : 'root');
+/* ---------- the literal tree ---------- */
+const ltree = document.getElementById('ltree');
+const showRules = document.getElementById('showRules');
+
+function line(cls, guide, label, right, extra){
+  const d = document.createElement('div');
+  d.className = 'tline ' + cls;
+  d.innerHTML = `<span class="guide"></span><span class="bul"></span><span class="lbl"></span>` +
+                `<span class="dots"></span><span class="cnt"></span><span class="${extra ? 'numv' : 'st'}"></span>`;
+  d.children[0].textContent = guide;
+  d.children[1].textContent = cls.includes('rule1') ? '• ' : '';
+  d.children[2].textContent = label;
+  d.children[4].textContent = right || '';
+  d.children[5].textContent = extra || '';
+  return d;
+}
+
+function drawTree(){
+  const frag = document.createDocumentFragment();
+  const withRules = showRules.checked;
+
+  (function walk(n, prefix, isLast, depth){
+    const guide = depth === 0 ? '' : prefix + (isLast ? '└── ' : '├── ');
+    const status = n.status === 'not-yet-extracted' ? 'not yet extracted'
+                 : n.status === 'out-of-scope' ? 'out of scope' : '';
+    const row = line('node d' + depth, guide, n.label, String(n.t), '');
+    if (status) row.children[5].textContent = status;
+    row.addEventListener('click', () => { showView('ex'); select(n.id); });
+    frag.appendChild(row);
+
+    const childPrefix = depth === 0 ? '' : prefix + (isLast ? '    ' : '│   ');
+
+    if (withRules && n.rules.length){
+      const stem = childPrefix + (n.children.length ? '│   ' : '    ');
+      n.rules.forEach(rid => {
+        const r = RULES[rid];
+        let nums = (r.v || []).slice(0, 2).join(' · ');
+        if (nums.length > 46) nums = nums.slice(0, 45).trimEnd() + '…';
+        frag.appendChild(line('rule1', stem, r.t, r.c, nums));
+      });
+    }
+    n.children.forEach((c, i) => walk(c, childPrefix, i === n.children.length - 1, depth + 1));
+  })(TREE, '', true, 0);
+
+  ltree.replaceChildren(frag);
+}
+showRules.addEventListener('change', drawTree);
+
+/* ---------- view switching ---------- */
+const tabOv = document.getElementById('tab-ov'), tabEx = document.getElementById('tab-ex');
+const ovEl = document.getElementById('overview'), bodyEl = document.querySelector('.body');
+function showView(v){
+  const ov = v === 'ov';
+  ovEl.classList.toggle('on', ov);
+  bodyEl.style.display = ov ? 'none' : 'grid';
+  tabOv.setAttribute('aria-selected', String(ov));
+  tabEx.setAttribute('aria-selected', String(!ov));
+  document.getElementById('rulesToggle').style.display = ov ? 'flex' : 'none';
+}
+tabOv.addEventListener('click', () => showView('ov'));
+tabEx.addEventListener('click', () => showView('ex'));
+
+drawTree();
+const deep = location.hash.slice(1);
+select(deep && byId[deep] ? deep : 'root');
+showView(deep && byId[deep] ? 'ex' : 'ov');
 </script>
