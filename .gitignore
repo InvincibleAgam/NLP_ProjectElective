@@ -29,3 +29,6 @@ outputs/phase1/
 # are committed, since they are the working dataset.
 data/callreport/
 data/callreport*.zip
+
+# Rendered rule tree (672KB, regenerable from src/analysis/render_tree.py)
+outputs/rule_tree.html
