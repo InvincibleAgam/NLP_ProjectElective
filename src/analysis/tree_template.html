@@ -229,6 +229,34 @@ mark{background:var(--warn-bg); color:inherit; padding:0 1px; border-radius:2px}
 .tline.d1{border-left-color:var(--fam,transparent)}
 .tline.d1 .car{color:var(--fam,var(--accent-line))}
 
+/* parameters — the classified quantities a branch is governed by */
+.pline{
+  display:flex; align-items:baseline; white-space:nowrap; line-height:1.75;
+  padding:1px 8px 1px 0; border-radius:4px;
+}
+.pline .pk{
+  color:var(--ink-3); flex:0 0 auto; margin-left:2px;
+  font-size:11.5px; letter-spacing:.02em;
+}
+.pline .pv{color:var(--ok); flex:0 0 auto; margin-left:10px}
+.pline .dia{color:var(--accent-line); opacity:.6; flex:0 0 auto; white-space:pre}
+
+.pgrid{display:flex; flex-direction:column; gap:9px; margin:0 0 26px; max-width:80ch}
+.pgroup{display:grid; grid-template-columns:168px 1fr; gap:14px; align-items:baseline}
+.pkind{
+  font-family:"IBM Plex Sans",sans-serif; font-size:11.5px; font-weight:600;
+  letter-spacing:.04em; color:var(--ink-3); text-align:right;
+}
+.pvals{display:flex; flex-wrap:wrap; gap:6px}
+.pval{
+  font-family:"IBM Plex Mono",monospace; font-size:11.5px; line-height:1.5;
+  background:var(--sunk); border:1px solid var(--rule-2); color:var(--ink-2);
+  border-radius:3px; padding:3px 8px; cursor:default;
+}
+.pval b{color:var(--ok); font-weight:600}
+.pval i{font-style:normal; color:var(--ink-3)}
+.pval.plain b{color:var(--ink)}
+
 /* a rule opened in place */
 .rdet{
   white-space:normal; margin:5px 0 12px; padding:15px 19px; max-width:78ch;
@@ -248,6 +276,7 @@ mark{background:var(--warn-bg); color:inherit; padding:0 1px; border-radius:2px}
 @media print{
   header .tabs,header .search,header .toggle{display:none !important}
   .ovbar,.jump{display:none !important}
+  .pline{break-inside:avoid}
   #overview{display:block !important; overflow:visible; padding:0}
   .body{display:none !important}
   .app{height:auto}
@@ -273,6 +302,7 @@ mark{background:var(--warn-bg); color:inherit; padding:0 1px; border-radius:2px}
       <button class="tab" id="tab-ex" role="tab" aria-selected="false" type="button">Explore</button>
     </div>
     <label class="toggle" id="rulesToggle"><input type="checkbox" id="showRules" checked> rule lines</label>
+    <label class="toggle" id="paramsToggle"><input type="checkbox" id="showParams"> parameters</label>
     <input class="search" id="q" type="search" placeholder="Search rules and branches…" autocomplete="off">
   </header>
   <section id="overview" class="on">
@@ -283,7 +313,7 @@ mark{background:var(--warn-bg); color:inherit; padding:0 1px; border-radius:2px}
     <div class="ovbar">
       <button class="mini" id="expandAll" type="button">Expand all</button>
       <button class="mini" id="collapseAll" type="button">Collapse all</button>
-      <span class="hint">click a branch to unfold · click a rule to read it · <em>open →</em> sends it to the explorer</span>
+      <span class="hint">click a branch to unfold · click a rule to read it · tick <em>parameters</em> for the quantities on each branch</span>
     </div>
     <div class="ltree" id="ltree"></div>
   </section>
@@ -388,6 +418,22 @@ function select(id){
     html += `<p><span class="status st-scope">deliberately out of scope</span></p>`;
   if (n.note) html += `<p class="note">${esc(n.note)}</p>`;
 
+  if ((n.params || []).length){
+    const total = n.params.reduce((a, g) => a + g.v.length, 0);
+    html += `<div class="secthead">Parameters on this branch · ${total}</div><div class="pgrid">`;
+    n.params.forEach(g => {
+      html += `<div class="pgroup"><div class="pkind">${esc(g.l)}</div><div class="pvals">` +
+        g.v.map(v => {
+          const t = pvalText(v);
+          const body = t.head
+            ? `<b>${esc(t.head)}</b>${t.tail ? ' <i>' + esc(t.tail) + '</i>' : ''}`
+            : `<b>${esc(t.tail)}</b>`;
+          return `<span class="pval${t.head ? '' : ' plain'}" title="${esc(v.c)}">${body}</span>`;
+        }).join('') + `</div></div>`;
+    });
+    html += `</div>`;
+  }
+
   if (n.children.length){
     html += `<div class="secthead">Branches</div><div class="childgrid">` +
       n.children.map(c => `<button class="childcard" type="button" data-go="${esc(c.id)}">
@@ -447,6 +493,8 @@ const showRules = document.getElementById('showRules');
 const FAM = {assets:'fam-assets', funding:'fam-funding', obs:'fam-obs',
              capital:'fam-capital', cross:'fam-cross'};
 const openNodes = new Set(), openRules = new Set();
+const showParams = document.getElementById('showParams');
+const node_params = n => n.params || [];
 
 function depthOf(id){ let d = 0, c = parentOf[id]; while (c){ d++; c = parentOf[c]; } return d; }
 function famOf(id){
@@ -456,6 +504,27 @@ function famOf(id){
 }
 // land on the shape of the thing: the families and their main branches
 Object.keys(byId).forEach(id => { if (depthOf(id) <= 1) openNodes.add(id); });
+
+function pvalText(v){
+  const head = v.pct !== null && v.pct !== undefined ? v.pct + '%' : (v.money || '');
+  return {head, tail: head ? (v.q || '') : v.raw};
+}
+
+function addParams(frag, node, stem){
+  node.params.forEach(g => {
+    const row = document.createElement('div');
+    row.className = 'pline';
+    row.innerHTML = `<span class="guide"></span><span class="dia">◇</span>` +
+                    `<span class="pk"></span><span class="pv"></span>`;
+    row.querySelector('.guide').textContent = stem;
+    row.querySelector('.pk').textContent = ' ' + g.l;
+    row.querySelector('.pv').textContent = g.v.map(v => {
+      const t = pvalText(v);
+      return t.head ? (t.head + (t.tail ? ' ' + t.tail : '')) : t.tail;
+    }).join('   ·   ').slice(0, 150);
+    frag.appendChild(row);
+  });
+}
 
 function addRule(frag, rid, stem){
   const r = RULES[rid];
@@ -526,6 +595,9 @@ function drawTree(){
     if (!isOpen) return;
 
     const childPrefix = depth === 0 ? '' : prefix + (isLast ? '    ' : '│   ');
+    if (showParams.checked && node_params(n).length){
+      addParams(frag, n, childPrefix + (n.children.length ? '│   ' : '    '));
+    }
     // branches before loose rules, the way a file tree puts folders before files —
     // otherwise a node carrying twenty rules buries its own sub-branches
     n.children.forEach((c, i) => walk(c, childPrefix, i === n.children.length - 1, depth + 1));
@@ -538,6 +610,7 @@ function drawTree(){
 }
 
 showRules.addEventListener('change', drawTree);
+showParams.addEventListener('change', drawTree);
 document.getElementById('expandAll').addEventListener('click', () => {
   Object.keys(byId).forEach(id => openNodes.add(id)); drawTree();
 });
@@ -559,6 +632,7 @@ function showView(v){
   tabOv.setAttribute('aria-selected', String(ov));
   tabEx.setAttribute('aria-selected', String(!ov));
   document.getElementById('rulesToggle').style.display = ov ? 'flex' : 'none';
+  document.getElementById('paramsToggle').style.display = ov ? 'flex' : 'none';
 }
 tabOv.addEventListener('click', () => showView('ov'));
 tabEx.addEventListener('click', () => showView('ex'));

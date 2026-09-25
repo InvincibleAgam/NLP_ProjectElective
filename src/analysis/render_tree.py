@@ -18,6 +18,14 @@ def trim(tree: dict, rules: dict) -> tuple[dict, dict]:
             "id": n["id"], "label": n["label"], "desc": n["desc"],
             "note": n.get("note", ""), "status": n.get("status", ""),
             "rules": n["rules"], "n": n["rule_count"], "t": n["total_count"],
+            # parameters are the point of the exercise, so they travel with the node
+            "params": [{"k": g["kind"], "l": g["label"],
+                        "v": [{"raw": v["raw"], "pct": v["pct"], "money": v["money"],
+                               "q": v["qualifier"], "c": v["cites"][0] if v["cites"] else "",
+                               "r": v["rules"][0] if v["rules"] else ""}
+                              for v in g["values"]]}
+                       for g in n.get("params", [])],
+            "p": n.get("param_count", 0), "pt": n.get("param_total", 0),
             "children": [node(c) for c in n["children"]],
         }
 

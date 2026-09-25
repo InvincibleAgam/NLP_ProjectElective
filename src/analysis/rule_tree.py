@@ -319,6 +319,10 @@ TAXONOMY = N("root", "The bank balance sheet under Basel III",
           note="LCR40.59 excludes unconditionally cancellable facilities, routing them to LCR40.67. The property that earns a card line a low conversion factor also removes it from the 5% drawdown."),
         N("obs-lev", "Off-balance sheet in the leverage exposure measure",
           "The leverage ratio converts the same commitments, but with its own floor, so it can bind where the risk-based ratio does not.",
+          # LEV30 and CRE20 share the heading "Off-balance sheet items", so the
+          # heading alone ties and the earlier-defined node wins. The paragraph
+          # range is what actually separates them.
+          paras=[("LEV30", 44, 62)],
           chapters=["LEV30"], headings=["Off-balance sheet items"]),
       ]),
 
@@ -367,7 +371,11 @@ TAXONOMY = N("root", "The bank balance sheet under Basel III",
       children=[
         N("lev", "Leverage ratio",
           "Tier 1 capital over a non-risk-weighted exposure measure, at least 3%. A backstop that bites hardest on banks whose assets carry low risk weights.",
-          chapters=["LEV10", "LEV20", "LEV30", "LEV90"]),
+          # LEV40's paragraphs inherit "Off-balance sheet items" from the tail of
+          # LEV30 in the source PDF, which outscores a chapter match. Anchor on
+          # the paragraph ids, which are validated against the corpus.
+          paras=[("LEV10", 1, 20), ("LEV20", 1, 20), ("LEV40", 1, 20), ("LEV90", 1, 20)],
+          chapters=["LEV10", "LEV20", "LEV30", "LEV40", "LEV90"]),
         N("lcr", "Liquidity coverage ratio",
           "HQLA over net thirty-day stressed outflows, at least 100%. The requirement itself; its inputs sit under Assets and Liabilities.",
           chapters=["LCR10", "LCR20", "LCR90", "LCR99"]),
@@ -442,7 +450,12 @@ def score(rule, node, headings: dict[str, list[str]]) -> float:
         if h.lower() in hp:
             best = max(best, 60)
 
-    if src.get("chapter") in node["chapters"]:
+    # Derive the chapter from the paragraph id rather than the extracted
+    # "chapter" field: para_ids are validated against the corpus, that field is
+    # free-form model output and is sometimes wrong (LEV40 rules labelled LEV30).
+    chapters = {PARA_RE.match(pid).group(1) + PARA_RE.match(pid).group(2)
+                for pid in pids if PARA_RE.match(pid)} or {src.get("chapter")}
+    if chapters & set(node["chapters"]):
         best = max(best, 30)
 
     if node["keywords"]:
