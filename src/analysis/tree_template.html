@@ -168,32 +168,86 @@ mark{background:var(--warn-bg); color:inherit; padding:0 1px; border-radius:2px}
 .toggle input{accent-color:var(--accent); margin:0}
 
 /* ---------- literal tree ---------- */
-#overview{overflow-y:auto; padding:22px 30px 80px; display:none}
+#overview{overflow-y:auto; padding:22px 30px 90px; display:none}
 #overview.on{display:block}
-.ovhead{max-width:70ch; margin:0 0 22px}
-.ovhead h2{font-size:24px; margin:0 0 8px}
+.ovhead{max-width:72ch; margin:0 0 4px}
+.ovhead h2{font-size:25px; margin:0 0 8px}
 .ovhead p{color:var(--ink-2); margin:0; font-size:16px}
-.ltree{
-  font-family:"IBM Plex Mono",ui-monospace,monospace; font-size:12.5px; line-height:1.85;
-  white-space:nowrap; overflow-x:auto; padding-bottom:20px;
+.ovbar{display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin:16px 0 22px}
+.mini{
+  font-family:"IBM Plex Sans",sans-serif; font-size:12px; font-weight:500;
+  background:var(--surface); color:var(--ink-2); border:1px solid var(--rule);
+  border-radius:4px; padding:5px 11px; cursor:pointer;
 }
-.tline{display:flex; align-items:baseline; gap:0; border-radius:3px}
-.tline.node{cursor:pointer}
-.tline.node:hover{background:var(--hover)}
-.guide{color:var(--ink-3); opacity:.5; flex:0 0 auto; white-space:pre}
+.mini:hover{border-color:var(--accent-line); color:var(--ink)}
+.mini:focus-visible{outline:2px solid var(--accent-line); outline-offset:1px}
+.hint{font-family:"IBM Plex Sans",sans-serif; font-size:12px; color:var(--ink-3)}
+.hint em{color:var(--ink-2); font-style:normal; font-family:"IBM Plex Mono",monospace}
+
+.ltree{
+  font-family:"IBM Plex Mono",ui-monospace,monospace; font-size:12.5px;
+  overflow-x:auto; padding-bottom:24px;
+}
+.tline{
+  display:flex; align-items:baseline; white-space:nowrap;
+  border-radius:4px; padding:2px 8px 2px 0; line-height:1.75;
+  border-left:2px solid transparent;
+}
+.tline.node,.tline.rule1{cursor:pointer}
+.tline.node:hover,.tline.rule1:hover{background:var(--hover)}
+.tline.open{background:var(--sunk)}
+.guide{color:var(--ink-3); opacity:.35; flex:0 0 auto; white-space:pre}
+.car{
+  flex:0 0 auto; width:13px; color:var(--accent-line); font-size:9px;
+  text-align:center; transition:transform .15s ease; display:inline-block;
+}
+.tline.open>.car{transform:rotate(90deg)}
+.car.none{opacity:0}
 .lbl{color:var(--ink); font-weight:500; flex:0 0 auto}
-.tline.d1 .lbl{font-weight:600}
-.dots{flex:1 1 auto; min-width:24px; border-bottom:1px dotted var(--rule); margin:0 8px 4px}
+.tline.d1 .lbl{font-weight:600; font-size:13.5px}
+.tline.d2 .lbl{font-weight:600}
+.dots{flex:1 1 auto; min-width:20px; border-bottom:1px dotted var(--rule); margin:0 10px 4px}
 .cnt{color:var(--ink-3); flex:0 0 auto; font-variant-numeric:tabular-nums}
 .st{color:var(--warn); flex:0 0 auto; margin-left:10px; font-size:11px}
+.jump{
+  flex:0 0 auto; margin-left:14px; background:none; border:0; cursor:pointer;
+  color:var(--ink-3); font:inherit; font-size:10.5px; opacity:0; padding:0 3px;
+}
+.tline.node:hover .jump{opacity:1}
+.jump:hover{color:var(--accent)}
+.jump:focus-visible{opacity:1; outline:2px solid var(--accent-line); outline-offset:1px; border-radius:3px}
 .tline.rule1 .lbl{color:var(--ink-2); font-weight:400}
 .tline.rule1 .dots{border-bottom-color:transparent}
 .tline.rule1 .cnt{color:var(--accent)}
-.bul{color:var(--accent-line); flex:0 0 auto; white-space:pre}
-.numv{color:var(--ok); flex:0 0 auto; margin-left:10px}
+.bul{color:var(--accent-line); flex:0 0 auto; white-space:pre; opacity:.75}
+.numv{color:var(--ok); flex:0 0 auto; margin-left:12px}
+
+/* a muted hue per top-level branch, carried on the left rail and the caret, so
+   depth is legible without colouring every line */
+.fam-assets{--fam:#5B6FA8} .fam-funding{--fam:#3F7F77} .fam-obs{--fam:#96702A}
+.fam-capital{--fam:#6E5A9E} .fam-cross{--fam:#4F7355}
+.tline.d1{border-left-color:var(--fam,transparent)}
+.tline.d1 .car{color:var(--fam,var(--accent-line))}
+
+/* a rule opened in place */
+.rdet{
+  white-space:normal; margin:5px 0 12px; padding:15px 19px; max-width:78ch;
+  background:var(--surface); border:1px solid var(--rule);
+  border-left:2px solid var(--accent-line); border-radius:0 5px 5px 0;
+  font-family:"Source Serif 4",Georgia,serif; font-size:15px;
+}
+.rdet .ob{margin-bottom:9px; display:inline-block}
+.rdet p{margin:0 0 9px; color:var(--ink-2)}
+.rdet blockquote{
+  border-left:2px solid var(--rule); margin:0 0 9px; padding-left:13px;
+  font-style:italic; color:var(--ink-2);
+}
+.rdet .rel{color:var(--ink-3); font-size:14px}
+.rdet .chips{margin-top:11px}
 
 @media print{
   header .tabs,header .search,header .toggle{display:none !important}
+  .ovbar,.jump{display:none !important}
   #overview{display:block !important; overflow:visible; padding:0}
   .body{display:none !important}
   .app{height:auto}
@@ -224,7 +278,12 @@ mark{background:var(--warn-bg); color:inherit; padding:0 1px; border-radius:2px}
   <section id="overview" class="on">
     <div class="ovhead">
       <h2>The whole tree, in one page</h2>
-      <p>Every branch of the framework and every rule on it, as a single line each. Untick <em>rule lines</em> for the bare skeleton; click any branch to open it in the explorer.</p>
+      <p>Every branch of the framework and every rule on it, one line each. Open a branch to see what sits under it, open a rule to read the provision it came from.</p>
+    </div>
+    <div class="ovbar">
+      <button class="mini" id="expandAll" type="button">Expand all</button>
+      <button class="mini" id="collapseAll" type="button">Collapse all</button>
+      <span class="hint">click a branch to unfold · click a rule to read it · <em>open →</em> sends it to the explorer</span>
     </div>
     <div class="ltree" id="ltree"></div>
   </section>
@@ -385,18 +444,52 @@ q.addEventListener('input', () => {
 /* ---------- the literal tree ---------- */
 const ltree = document.getElementById('ltree');
 const showRules = document.getElementById('showRules');
+const FAM = {assets:'fam-assets', funding:'fam-funding', obs:'fam-obs',
+             capital:'fam-capital', cross:'fam-cross'};
+const openNodes = new Set(), openRules = new Set();
 
-function line(cls, guide, label, right, extra){
-  const d = document.createElement('div');
-  d.className = 'tline ' + cls;
-  d.innerHTML = `<span class="guide"></span><span class="bul"></span><span class="lbl"></span>` +
-                `<span class="dots"></span><span class="cnt"></span><span class="${extra ? 'numv' : 'st'}"></span>`;
-  d.children[0].textContent = guide;
-  d.children[1].textContent = cls.includes('rule1') ? '• ' : '';
-  d.children[2].textContent = label;
-  d.children[4].textContent = right || '';
-  d.children[5].textContent = extra || '';
-  return d;
+function depthOf(id){ let d = 0, c = parentOf[id]; while (c){ d++; c = parentOf[c]; } return d; }
+function famOf(id){
+  let c = id;
+  while (parentOf[c] && parentOf[c] !== 'root') c = parentOf[c];
+  return FAM[c] || '';
+}
+// land on the shape of the thing: the families and their main branches
+Object.keys(byId).forEach(id => { if (depthOf(id) <= 1) openNodes.add(id); });
+
+function addRule(frag, rid, stem){
+  const r = RULES[rid];
+  let nums = (r.v || []).slice(0, 2).join(' · ');
+  if (nums.length > 44) nums = nums.slice(0, 43).trimEnd() + '…';
+  const isOpen = openRules.has(rid);
+
+  const row = document.createElement('div');
+  row.className = 'tline rule1' + (isOpen ? ' open' : '');
+  row.innerHTML = `<span class="guide"></span><span class="bul">•</span><span class="lbl"></span>` +
+                  `<span class="numv"></span><span class="dots"></span><span class="cnt"></span>`;
+  row.querySelector('.guide').textContent = stem;
+  row.querySelector('.lbl').textContent = ' ' + r.t;
+  row.querySelector('.numv').textContent = nums;
+  row.querySelector('.cnt').textContent = r.c;
+  row.addEventListener('click', () => {
+    openRules.has(rid) ? openRules.delete(rid) : openRules.add(rid);
+    drawTree();
+  });
+  frag.appendChild(row);
+
+  if (isOpen){
+    const chips = [`<span class="chip cite">${esc(r.c)}</span>`]
+      .concat((r.v || []).map(v => `<span class="chip num">${esc(v)}</span>`))
+      .concat((r.p || []).filter(x => x !== 'all').map(x => `<span class="chip">${esc(x)}</span>`));
+    const d = document.createElement('div');
+    d.className = 'rdet';
+    d.style.marginLeft = (stem.length + 2) + 'ch';
+    d.innerHTML = `<span class="ob ob-${esc(r.o)}">${esc(r.o)}</span>` +
+      `<p>${esc(r.s)}</p><blockquote>${esc(r.q)}</blockquote>` +
+      (r.r ? `<p class="rel">${esc(r.r)}</p>` : '') +
+      `<div class="chips">${chips.join('')}</div>`;
+    frag.appendChild(d);
+  }
 }
 
 function drawTree(){
@@ -405,30 +498,56 @@ function drawTree(){
 
   (function walk(n, prefix, isLast, depth){
     const guide = depth === 0 ? '' : prefix + (isLast ? '└── ' : '├── ');
-    const status = n.status === 'not-yet-extracted' ? 'not yet extracted'
-                 : n.status === 'out-of-scope' ? 'out of scope' : '';
-    const row = line('node d' + depth, guide, n.label, String(n.t), '');
-    if (status) row.children[5].textContent = status;
-    row.addEventListener('click', () => { showView('ex'); select(n.id); });
+    const expandable = n.children.length > 0 || (withRules && n.rules.length > 0);
+    const isOpen = openNodes.has(n.id) && expandable;
+
+    const row = document.createElement('div');
+    row.className = `tline node d${depth} ${famOf(n.id)}` + (isOpen ? ' open' : '');
+    row.innerHTML =
+      `<span class="guide"></span><span class="car${expandable ? '' : ' none'}">▶</span>` +
+      `<span class="lbl"></span><span class="dots"></span><span class="cnt"></span>` +
+      `<span class="st"></span><button class="jump" type="button">open →</button>`;
+    row.querySelector('.guide').textContent = guide;
+    row.querySelector('.lbl').textContent = ' ' + n.label;
+    row.querySelector('.cnt').textContent = String(n.t);
+    row.querySelector('.st').textContent =
+      n.status === 'not-yet-extracted' ? 'not yet extracted'
+      : n.status === 'out-of-scope' ? 'out of scope' : '';
+    row.addEventListener('click', e => {
+      if (e.target.closest('.jump')) return;
+      if (!expandable){ showView('ex'); select(n.id); return; }
+      openNodes.has(n.id) ? openNodes.delete(n.id) : openNodes.add(n.id);
+      drawTree();
+    });
+    row.querySelector('.jump').addEventListener('click', e => {
+      e.stopPropagation(); showView('ex'); select(n.id);
+    });
     frag.appendChild(row);
+    if (!isOpen) return;
 
     const childPrefix = depth === 0 ? '' : prefix + (isLast ? '    ' : '│   ');
-
-    if (withRules && n.rules.length){
-      const stem = childPrefix + (n.children.length ? '│   ' : '    ');
-      n.rules.forEach(rid => {
-        const r = RULES[rid];
-        let nums = (r.v || []).slice(0, 2).join(' · ');
-        if (nums.length > 46) nums = nums.slice(0, 45).trimEnd() + '…';
-        frag.appendChild(line('rule1', stem, r.t, r.c, nums));
-      });
-    }
+    // branches before loose rules, the way a file tree puts folders before files —
+    // otherwise a node carrying twenty rules buries its own sub-branches
     n.children.forEach((c, i) => walk(c, childPrefix, i === n.children.length - 1, depth + 1));
+    if (withRules && n.rules.length){
+      n.rules.forEach(rid => addRule(frag, rid, childPrefix + '    '));
+    }
   })(TREE, '', true, 0);
 
   ltree.replaceChildren(frag);
 }
+
 showRules.addEventListener('change', drawTree);
+document.getElementById('expandAll').addEventListener('click', () => {
+  Object.keys(byId).forEach(id => openNodes.add(id)); drawTree();
+});
+document.getElementById('collapseAll').addEventListener('click', () => {
+  openNodes.clear(); openNodes.add('root'); drawTree();
+});
+// print the whole tree, not whatever happens to be unfolded on screen
+window.addEventListener('beforeprint', () => {
+  Object.keys(byId).forEach(id => openNodes.add(id)); drawTree();
+});
 
 /* ---------- view switching ---------- */
 const tabOv = document.getElementById('tab-ov'), tabEx = document.getElementById('tab-ex');
