@@ -292,6 +292,30 @@ mark{background:var(--warn-bg); color:inherit; padding:0 1px; border-radius:2px}
   font-family:"IBM Plex Mono",monospace; font-size:10px; fill:var(--ink-3);
   dominant-baseline:middle; pointer-events:none;
 }
+.dnode.rule .dbox{fill:var(--paper); stroke:var(--rule-2)}
+.dnode.rule:hover .dbox{stroke:var(--accent-line); fill:var(--sunk)}
+.ddot{fill:var(--accent-line); opacity:.8}
+.dcard{
+  position:absolute; right:18px; bottom:46px; z-index:3; width:min(430px, calc(100% - 40px));
+  max-height:64%; overflow-y:auto; display:none;
+  background:var(--surface); border:1px solid var(--rule);
+  border-left:3px solid var(--accent-line); border-radius:0 6px 6px 0;
+  padding:16px 20px; box-shadow:0 6px 24px -10px rgba(0,0,0,.5);
+  font-family:"Source Serif 4",Georgia,serif; font-size:15px;
+}
+.dcard.on{display:block}
+.dcard p{margin:0 0 9px; color:var(--ink-2)}
+.dcard blockquote{
+  border-left:2px solid var(--rule); margin:0 0 9px; padding-left:13px;
+  font-style:italic; color:var(--ink-2);
+}
+.dcard .rel{color:var(--ink-3); font-size:14px}
+.dcard .chips{margin-top:11px}
+.dclose{
+  position:absolute; top:8px; right:10px; background:none; border:0; cursor:pointer;
+  color:var(--ink-3); font:inherit; font-size:17px; line-height:1; padding:3px 6px;
+}
+.dclose:hover{color:var(--ink)}
 .dplus{
   font-family:"IBM Plex Mono",monospace; font-size:11px; font-weight:600;
   fill:var(--accent-line); dominant-baseline:middle; text-anchor:middle; pointer-events:none;
@@ -363,10 +387,11 @@ mark{background:var(--warn-bg); color:inherit; padding:0 1px; border-radius:2px}
       <button class="mini" id="dFit" type="button">Fit</button>
       <button class="mini" id="dExpand" type="button">Expand all</button>
       <button class="mini" id="dCollapse" type="button">Collapse</button>
-      <label class="toggle"><input type="checkbox" id="dRules"> show rules as leaves</label>
+      <label class="toggle"><input type="checkbox" id="dRules" checked> show rules</label>
     </div>
     <svg id="dsvg"><g id="dstage"></g></svg>
-    <p class="dhint">click a node to open or close it · drag to pan · scroll to zoom · double-click a node to send it to the explorer</p>
+    <div class="dcard" id="dcard"><button class="dclose" id="dcardX" type="button">×</button><div id="dcardBody"></div></div>
+    <p class="dhint">click a branch to open or close it · click a rule to read it · drag to pan · scroll to zoom · double-click sends a branch to the explorer</p>
   </section>
   <div class="body">
     <nav id="tree" aria-label="Rule taxonomy"></nav>
@@ -706,7 +731,7 @@ function layout(){
   (function walk(n, depth){
     const kids = openNodes.has(n.id) ? n.children : [];
     const leaves = openNodes.has(n.id) && dRules.checked
-      ? n.rules.map(rid => ({id:'R:'+rid, rule:rid, label:RULES[rid].t,
+      ? n.rules.map(rid => ({id:'R:'+rid, rule:rid, label:RULES[rid].t, parent:n.id,
                              children:[], rules:[], t:0, isRule:true}))
       : [];
     const all = kids.concat(leaves);
@@ -732,10 +757,11 @@ function drawDiagram(){
 
   // measure first: edges must leave from beyond the count text, or the two collide
   nodes.forEach(n => {
-    n._label = trunc(n.label, 34);
+    n._label = trunc(n.label, n.isRule ? 46 : 34);
     n._expandable = !n.isRule && (n.children.length > 0 || (dRules.checked && n.rules.length > 0));
     n._plus = n._expandable && !openNodes.has(n.id);
-    n._w = boxW(n._label, n._plus);
+    n._w = n.isRule ? Math.min(300, Math.max(110, 26 + n._label.length * 6.0))
+                    : boxW(n._label, n._plus);
     n._meta = n.isRule ? RULES[n.rule].c : `${n.t}${n.pt ? ' · ' + n.pt + 'p' : ''}`;
     n._out = n._w + metaW(n._meta) + 8;
   });
@@ -752,16 +778,18 @@ function drawDiagram(){
     const label = n._label, w = n._w;
     const expandable = n._expandable;
     const isOpen = openNodes.has(n.id);
-    const g = el('g', {class:'dnode' + (n.id === dsel ? ' sel' : '') +
+    const g = el('g', {class:'dnode' + (n.isRule ? ' rule' : '') + (n.id === dsel ? ' sel' : '') +
                               (expandable && !isOpen ? ' shut' : ''),
                        transform:`translate(${n._x},${n._y})`});
     g.appendChild(el('rect', {class:'dbox', x:0, y:0, width:w, height:BOX_H}));
-    if (!n.isRule)
+    if (n.isRule)
+      g.appendChild(el('circle', {class:'ddot', cx:11, cy:BOX_H / 2, r:2.6}));
+    else
       g.appendChild(el('rect', {class:'drail', x:0, y:0, width:3, height:BOX_H,
                                 fill:famHue(n.id)}));
-    const t = el('text', {class:'dlabel', x:12, y:BOX_H / 2});
+    const t = el('text', {class:'dlabel', x:n.isRule ? 20 : 12, y:BOX_H / 2});
     t.textContent = label;
-    if (n.isRule) t.setAttribute('font-size', '11');
+    if (n.isRule){ t.setAttribute('font-size', '11'); t.setAttribute('font-weight', '400'); }
     g.appendChild(t);
 
     const meta = el('text', {class:'dmeta', x:w + 8, y:BOX_H / 2});
@@ -779,20 +807,37 @@ function drawDiagram(){
 
     g.addEventListener('click', e => {
       e.stopPropagation();
-      if (n.isRule){ dsel = n.id; showView('ex'); select(parentOf[n.id] || 'root'); return; }
+      if (n.isRule){ dsel = n.id; showRuleCard(n.rule); drawDiagram(); return; }
       dsel = n.id;
       if (expandable) openNodes.has(n.id) ? openNodes.delete(n.id) : openNodes.add(n.id);
       drawDiagram();
     });
     g.addEventListener('dblclick', e => {
       e.stopPropagation();
-      if (!n.isRule){ showView('ex'); select(n.id); }
+      showView('ex'); select(n.isRule ? n.parent : n.id);
     });
     frag.appendChild(g);
   });
 
   dstage.replaceChildren(frag);
   applyView();
+}
+
+const dcard = document.getElementById('dcard'), dcardBody = document.getElementById('dcardBody');
+document.getElementById('dcardX').addEventListener('click', () => dcard.classList.remove('on'));
+
+function showRuleCard(rid){
+  const r = RULES[rid];
+  const chips = [`<span class="chip cite">${esc(r.c)}</span>`]
+    .concat((r.v || []).map(v => `<span class="chip num">${esc(v)}</span>`))
+    .concat((r.p || []).filter(x => x !== 'all').map(x => `<span class="chip">${esc(x)}</span>`));
+  dcardBody.innerHTML =
+    `<span class="ob ob-${esc(r.o)}">${esc(r.o)}</span>` +
+    `<p><strong>${esc(r.t)}</strong></p><p>${esc(r.s)}</p>` +
+    `<blockquote>${esc(r.q)}</blockquote>` +
+    (r.r ? `<p class="rel">${esc(r.r)}</p>` : '') +
+    `<div class="chips">${chips.join('')}</div>`;
+  dcard.classList.add('on');
 }
 
 function applyView(){
