@@ -260,7 +260,8 @@ mark{background:var(--warn-bg); color:inherit; padding:0 1px; border-radius:2px}
 /* ---------- node-link diagram ---------- */
 #diagram{display:none; position:relative; overflow:hidden; background:var(--paper)}
 #diagram.on{display:block; flex:1 1 auto; min-height:0}
-#dsvg{display:block; width:100%; height:100%; cursor:grab; touch-action:none}
+#dsvg{display:block; width:100%; height:100%; cursor:grab; touch-action:none;
+  user-select:none; -webkit-user-select:none}
 #dsvg.drag{cursor:grabbing}
 .dctl{
   position:absolute; top:14px; left:18px; z-index:2;
@@ -818,16 +819,33 @@ dsvg.addEventListener('wheel', e => {
   applyView();
 }, {passive:false});
 
+// Capture only once a real drag starts. Capturing on pointerdown redirects the
+// following click to the svg, so it never reaches the node and nothing opens.
 let drag = null;
 dsvg.addEventListener('pointerdown', e => {
-  drag = {x:e.clientX - view.x, y:e.clientY - view.y};
-  dsvg.classList.add('drag'); dsvg.setPointerCapture(e.pointerId);
+  drag = {x0:e.clientX, y0:e.clientY, vx:view.x, vy:view.y, moved:false, id:e.pointerId};
 });
 dsvg.addEventListener('pointermove', e => {
   if (!drag) return;
-  view.x = e.clientX - drag.x; view.y = e.clientY - drag.y; applyView();
+  const dx = e.clientX - drag.x0, dy = e.clientY - drag.y0;
+  if (!drag.moved){
+    if (Math.abs(dx) + Math.abs(dy) < 4) return;      // a click, not a drag
+    drag.moved = true;
+    dsvg.classList.add('drag');
+    try { dsvg.setPointerCapture(drag.id); } catch (_) {}
+  }
+  view.x = drag.vx + dx; view.y = drag.vy + dy;
+  applyView();
 });
-dsvg.addEventListener('pointerup', () => { drag = null; dsvg.classList.remove('drag'); });
+function endDrag(){
+  if (drag && drag.moved){
+    try { dsvg.releasePointerCapture(drag.id); } catch (_) {}
+    dsvg.classList.remove('drag');
+  }
+  drag = null;
+}
+dsvg.addEventListener('pointerup', endDrag);
+dsvg.addEventListener('pointercancel', endDrag);
 
 dRules.addEventListener('change', drawDiagram);
 document.getElementById('dFit').addEventListener('click', fitDiagram);
@@ -860,7 +878,8 @@ tabDg.addEventListener('click', () => showView('dg'));
 tabEx.addEventListener('click', () => showView('ex'));
 
 drawTree();
+// #diagram opens straight onto the drawing; #<node-id> onto that node in the explorer
 const deep = location.hash.slice(1);
 select(deep && byId[deep] ? deep : 'root');
-showView(deep && byId[deep] ? 'ex' : 'ov');
+showView(deep === 'diagram' ? 'dg' : (deep && byId[deep] ? 'ex' : 'ov'));
 </script>
