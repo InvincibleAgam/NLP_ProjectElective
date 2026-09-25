@@ -1,0 +1,103 @@
+{
+ "current": 343.20667753674655,
+ "hold": {
+  "ok": true,
+  "profit": 371.55063068149224,
+  "cards": 7281.404246913581,
+  "securities": 0.0,
+  "cash": 2031.1285530864197,
+  "undrawn": 40622.57106172839,
+  "assets": 9312.5328,
+  "utilisation": 0.15200000000000002,
+  "rwa": 8507.746014814815,
+  "cet1_ratio": 0.12396091728214993,
+  "constraints": [
+   {
+    "name": "CET1 \u2265 7.0% (RBC20.1, RBC30.2)",
+    "slack": 6558.368270899469,
+    "shadow": 0.0,
+    "binding": false
+   },
+   {
+    "name": "Leverage \u2265 3% (LEV20.7)",
+    "slack": 21779.476760493824,
+    "shadow": 0.0,
+    "binding": false
+   },
+   {
+    "name": "Cover a 5% line drawdown (LCR40.64)",
+    "slack": 0.0,
+    "shadow": 0.03811715451938033,
+    "binding": true
+   },
+   {
+    "name": "Balance sheet \u2264 +20% (funding capacity)",
+    "slack": 0.0,
+    "shadow": 0.039897913775025,
+    "binding": true
+   },
+   {
+    "name": "Utilisation \u2264 15%",
+    "slack": -9.094947017729282e-13,
+    "shadow": 0.012538537670848796,
+    "binding": true
+   },
+   {
+    "name": "Utilisation \u2265 15%",
+    "slack": 9.094947017729282e-13,
+    "shadow": 0.0,
+    "binding": true
+   }
+  ]
+ },
+ "free": {
+  "ok": true,
+  "profit": 411.35245066665357,
+  "cards": 8097.854608695655,
+  "securities": 0.0,
+  "cash": 1214.6781913043483,
+  "undrawn": 24293.563826086964,
+  "assets": 9312.532800000003,
+  "utilisation": 0.25,
+  "rwa": 7895.408243478263,
+  "cet1_ratio": 0.13357485357025584,
+  "constraints": [
+   {
+    "name": "CET1 \u2265 7.0% (RBC20.1, RBC30.2)",
+    "slack": 7170.706042236021,
+    "shadow": 0.0,
+    "binding": false
+   },
+   {
+    "name": "Leverage \u2265 3% (LEV20.7)",
+    "slack": 23412.377484057964,
+    "shadow": 0.0,
+    "binding": false
+   },
+   {
+    "name": "Cover a 5% line drawdown (LCR40.64)",
+    "slack": 0.0,
+    "shadow": 0.04239116040370445,
+    "binding": true
+   },
+   {
+    "name": "Balance sheet \u2264 +20% (funding capacity)",
+    "slack": -1.8189894035458565e-12,
+    "shadow": 0.04417191965934912,
+    "binding": true
+   },
+   {
+    "name": "Utilisation \u2264 25%",
+    "slack": 0.0,
+    "shadow": 0.008478232080740885,
+    "binding": true
+   },
+   {
+    "name": "Utilisation \u2265 10%",
+    "slack": 4858.712765217393,
+    "shadow": 0.0,
+    "binding": false
+   }
+  ]
+ }
+}

@@ -1,0 +1,186 @@
+{
+ "bank": {
+  "name": "COMENITY BANK",
+  "rssd": "1391778",
+  "assets": 7760.444,
+  "cards": 6756.18,
+  "undrawn": 37768.445,
+  "cash": 1148.986,
+  "securities": 78.007,
+  "equity": 1050.341,
+  "cet1": 1054.628,
+  "tier1": 1054.628,
+  "rwa_reported": 6979.457,
+  "yield_card": 0.2675758336194581,
+  "fee_rate": 0.019589028119440275,
+  "opex_rate": 0.12183156754260543,
+  "nco_rate": 0.06981352519845278,
+  "yield_cash": 0.04676993453358004,
+  "yield_sec": 0.042,
+  "funding_cost": 0.04498917527793537,
+  "utilisation": 0.15174030101320338,
+  "notes": [
+   "securities yield is indicative: the bank holds almost none, so the rate is not identified from its own filing"
+  ]
+ },
+ "current_profit": 343.20667753674655,
+ "reg": {
+  "rw_retail": {
+   "value": 0.75,
+   "cite": "CRE20.68(1)",
+   "desc": "Risk weight, regulatory retail not from transactors"
+  },
+  "rw_retail_txn": {
+   "value": 0.45,
+   "cite": "CRE20.68(2)",
+   "desc": "Risk weight, regulatory retail from transactors"
+  },
+  "rw_securities": {
+   "value": 0.2,
+   "cite": "CRE20.30",
+   "desc": "Risk weight, investment-grade bank/sovereign paper (indicative)"
+  },
+  "rw_cash": {
+   "value": 0.0,
+   "cite": "CRE20.110",
+   "desc": "Risk weight, cash and central bank balances"
+  },
+  "ccf_ucc": {
+   "value": 0.1,
+   "cite": "CRE20.100",
+   "desc": "Conversion factor, unconditionally cancellable commitments"
+  },
+  "cet1_min": {
+   "value": 0.045,
+   "cite": "RBC20.1(1)",
+   "desc": "Minimum CET1 ratio"
+  },
+  "cet1_buffered": {
+   "value": 0.07,
+   "cite": "RBC20.1 + RBC30.2",
+   "desc": "CET1 minimum plus the 2.5% conservation buffer"
+  },
+  "lev_min": {
+   "value": 0.03,
+   "cite": "LEV20.7",
+   "desc": "Minimum leverage ratio"
+  },
+  "lcr_drawdown": {
+   "value": 0.05,
+   "cite": "LCR40.64(1)",
+   "desc": "30-day drawdown on committed retail facilities"
+  },
+  "us_ccf_ucc": {
+   "value": 0.0,
+   "cite": "12 CFR 217.33(b)(1)",
+   "desc": "US conversion factor, unconditionally cancellable"
+  },
+  "us_rw_retail": {
+   "value": 1.0,
+   "cite": "12 CFR 217.32(l)(5)",
+   "desc": "US risk weight, retail as residual other assets"
+  }
+ },
+ "runs": {
+  "basel": {
+   "ok": true,
+   "profit": 411.35245066665357,
+   "cards": 8097.854608695655,
+   "securities": 0.0,
+   "cash": 1214.6781913043483,
+   "undrawn": 24293.563826086964,
+   "assets": 9312.532800000003,
+   "utilisation": 0.25,
+   "rwa": 7895.408243478263,
+   "cet1_ratio": 0.13357485357025584,
+   "constraints": [
+    {
+     "name": "CET1 \u2265 7.0% (RBC20.1, RBC30.2)",
+     "slack": 7170.706042236021,
+     "shadow": 0.0,
+     "binding": false
+    },
+    {
+     "name": "Leverage \u2265 3% (LEV20.7)",
+     "slack": 23412.377484057964,
+     "shadow": 0.0,
+     "binding": false
+    },
+    {
+     "name": "Cover a 5% line drawdown (LCR40.64)",
+     "slack": 0.0,
+     "shadow": 0.04239116040370445,
+     "binding": true
+    },
+    {
+     "name": "Balance sheet \u2264 +20% (funding capacity)",
+     "slack": -1.8189894035458565e-12,
+     "shadow": 0.04417191965934912,
+     "binding": true
+    },
+    {
+     "name": "Utilisation \u2264 25%",
+     "slack": 0.0,
+     "shadow": 0.008478232080740885,
+     "binding": true
+    },
+    {
+     "name": "Utilisation \u2265 10%",
+     "slack": 4858.712765217393,
+     "shadow": 0.0,
+     "binding": false
+    }
+   ]
+  },
+  "us_today": {
+   "ok": true,
+   "profit": 411.3524506666535,
+   "cards": 8097.854608695653,
+   "securities": 0.0,
+   "cash": 1214.6781913043478,
+   "undrawn": 24293.563826086956,
+   "assets": 9312.5328,
+   "utilisation": 0.25000000000000006,
+   "rwa": 8097.854608695653,
+   "cet1_ratio": 0.13023548223099948,
+   "constraints": [
+    {
+     "name": "CET1 \u2265 7.0% (RBC20.1, RBC30.2)",
+     "slack": 6968.259677018631,
+     "shadow": 0.0,
+     "binding": false
+    },
+    {
+     "name": "Leverage \u2265 3% (LEV20.7)",
+     "slack": 25841.733866666662,
+     "shadow": 0.0,
+     "binding": false
+    },
+    {
+     "name": "Cover a 5% line drawdown (LCR40.64)",
+     "slack": 0.0,
+     "shadow": 0.04239116040370444,
+     "binding": true
+    },
+    {
+     "name": "Balance sheet \u2264 +20% (funding capacity)",
+     "slack": 0.0,
+     "shadow": 0.044171919659349114,
+     "binding": true
+    },
+    {
+     "name": "Utilisation \u2264 25%",
+     "slack": -9.094947017729282e-13,
+     "shadow": 0.008478232080740888,
+     "binding": true
+    },
+    {
+     "name": "Utilisation \u2265 10%",
+     "slack": 4858.712765217392,
+     "shadow": 0.0,
+     "binding": false
+    }
+   ]
+  }
+ }
+}

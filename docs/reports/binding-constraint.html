@@ -1,0 +1,344 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Binding Constraint</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,300..700;1,8..60,400&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+
+<style>
+:root{
+  --paper:#F4F5F8; --surface:#FFFFFF; --sunk:#ECEEF4;
+  --ink:#11141C; --ink-2:#3D4457; --ink-3:#6B7386;
+  --rule:#D6DAE4; --rule-2:#E6E9F0;
+  --accent:#26355C; --accent-soft:#E7EAF3;
+  --ok:#2F6B4F; --warn:#8A5E10; --crit:#8E2A2A;
+  --ok-bg:#E6EFEA; --warn-bg:#F5EEDD; --crit-bg:#F5E5E5;
+  --shadow:0 1px 2px rgba(17,20,28,.05),0 8px 24px -16px rgba(17,20,28,.25);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --paper:#0F1218; --surface:#161A23; --sunk:#1C2130;
+    --ink:#E5E8EF; --ink-2:#AEB6C6; --ink-3:#7E879B;
+    --rule:#2A3040; --rule-2:#222836;
+    --accent:#9DB0DE; --accent-soft:#1D2436;
+    --ok:#7FC3A0; --warn:#D9AC5C; --crit:#E08A8A;
+    --ok-bg:#16241D; --warn-bg:#2A2416; --crit-bg:#2A1919;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px -16px rgba(0,0,0,.7);
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#0F1218; --surface:#161A23; --sunk:#1C2130;
+  --ink:#E5E8EF; --ink-2:#AEB6C6; --ink-3:#7E879B;
+  --rule:#2A3040; --rule-2:#222836;
+  --accent:#9DB0DE; --accent-soft:#1D2436;
+  --ok:#7FC3A0; --warn:#D9AC5C; --crit:#E08A8A;
+  --ok-bg:#16241D; --warn-bg:#2A2416; --crit-bg:#2A1919;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px -16px rgba(0,0,0,.7);
+}
+*{box-sizing:border-box}
+body{margin:0; background:var(--paper); color:var(--ink);
+  font-family:"Source Serif 4",Georgia,serif; font-size:17px; line-height:1.65;
+  font-optical-sizing:auto; -webkit-font-smoothing:antialiased;}
+.wrap{max-width:1040px; margin:0 auto; padding:0 28px 96px}
+.col{max-width:68ch}
+header{border-bottom:1px solid var(--rule); padding:56px 0 28px; margin-bottom:40px}
+.eyebrow{font-family:"IBM Plex Mono",monospace; font-size:11.5px; font-weight:500;
+  letter-spacing:.14em; text-transform:uppercase; color:var(--ink-3); margin:0 0 18px}
+h1{font-size:clamp(34px,5.2vw,52px); line-height:1.06; font-weight:600;
+  letter-spacing:-.02em; margin:0 0 18px; text-wrap:balance}
+.standfirst{font-size:20px; line-height:1.5; color:var(--ink-2); margin:0 0 26px; max-width:62ch}
+.meta{display:flex; flex-wrap:wrap; gap:10px 26px;
+  font-family:"IBM Plex Sans",sans-serif; font-size:13px; color:var(--ink-3)}
+.meta b{font-weight:600; color:var(--ink-2); font-variant-numeric:tabular-nums}
+h2{font-size:28px; line-height:1.18; font-weight:600; letter-spacing:-.015em;
+  margin:58px 0 6px; text-wrap:balance}
+h2 .num{font-family:"IBM Plex Mono",monospace; font-size:13.5px; font-weight:500;
+  color:var(--accent); display:block; margin-bottom:8px; letter-spacing:.08em}
+h3{font-size:19px; font-weight:600; margin:32px 0 8px; letter-spacing:-.01em}
+p{margin:0 0 17px}
+.lede{font-size:18.5px; color:var(--ink-2)}
+code{font-family:"IBM Plex Mono",monospace; font-size:.87em; background:var(--sunk);
+  padding:.12em .38em; border-radius:3px; color:var(--ink-2)}
+strong{font-weight:600}
+.cite{font-family:"IBM Plex Mono",monospace; font-size:11.5px; font-weight:500;
+  color:var(--accent); background:var(--accent-soft); padding:.16em .48em;
+  border-radius:3px; white-space:nowrap}
+.formula{font-family:"IBM Plex Mono",monospace; font-size:13.5px; line-height:1.8;
+  background:var(--sunk); border-left:2px solid var(--accent); padding:14px 18px;
+  margin:0 0 18px; border-radius:0 3px 3px 0; overflow-x:auto; color:var(--ink-2)}
+.formula b{color:var(--ink); font-weight:600}
+.tw{overflow-x:auto; margin:0 0 10px}
+table{border-collapse:collapse; width:100%; min-width:540px;
+  font-family:"IBM Plex Sans",sans-serif; font-size:14px; font-variant-numeric:tabular-nums}
+caption{text-align:left; font-family:"IBM Plex Sans",sans-serif; font-size:12.5px;
+  color:var(--ink-3); padding:0 0 10px; line-height:1.5}
+th,td{padding:8px 14px 8px 0; text-align:left; border-bottom:1px solid var(--rule-2)}
+td.n+td,th.n+th{padding-left:18px}
+th{font-size:11px; font-weight:600; letter-spacing:.08em; text-transform:uppercase;
+  color:var(--ink-3); border-bottom:1px solid var(--rule); padding-bottom:7px}
+td.n,th.n{text-align:right; padding-right:0}
+tbody tr:last-child td{border-bottom:0}
+tr.hl td{background:var(--accent-soft)}
+tr.hl td:first-child{font-weight:600}
+tr.tot td{border-top:1px solid var(--rule); font-weight:600}
+.note{font-family:"IBM Plex Sans",sans-serif; font-size:12.5px; color:var(--ink-3);
+  margin:6px 0 0; line-height:1.55; max-width:74ch}
+.pill{display:inline-block; font-family:"IBM Plex Sans",sans-serif; font-size:11px;
+  font-weight:600; padding:.18em .55em; border-radius:3px; white-space:nowrap}
+.p-ok{background:var(--ok-bg); color:var(--ok)}
+.p-warn{background:var(--warn-bg); color:var(--warn)}
+.p-crit{background:var(--crit-bg); color:var(--crit)}
+.callout{background:var(--surface); border:1px solid var(--rule); border-radius:5px;
+  padding:22px 26px; margin:26px 0; box-shadow:var(--shadow)}
+.callout h3{margin-top:0}
+.callout p:last-child{margin-bottom:0}
+.callout.flag{border-left:3px solid var(--warn)}
+.callout.key{border-left:3px solid var(--accent)}
+.duo{display:grid; grid-template-columns:1fr 1fr; gap:26px; margin:24px 0}
+.panel{background:var(--surface); border:1px solid var(--rule); border-radius:5px; padding:20px 22px}
+.stat{font-family:"IBM Plex Mono",monospace; font-size:29px; font-weight:600;
+  letter-spacing:-.02em; color:var(--accent); display:block; line-height:1.1}
+.stat-l{font-family:"IBM Plex Sans",sans-serif; font-size:12px; color:var(--ink-3)}
+footer{border-top:1px solid var(--rule); margin-top:68px; padding-top:22px;
+  font-family:"IBM Plex Sans",sans-serif; font-size:13px; color:var(--ink-3)}
+@media print{
+  :root,:root[data-theme="dark"]{
+    --paper:#FFF; --surface:#FFF; --sunk:#F2F4F8; --ink:#11141C; --ink-2:#3D4457;
+    --ink-3:#666E82; --rule:#C9CEDA; --rule-2:#E0E4EC; --accent:#26355C;
+    --accent-soft:#EDF0F7; --ok:#2A6047; --warn:#7A5410; --crit:#7F2525;
+    --ok-bg:#EBF2EE; --warn-bg:#F7F1E3; --crit-bg:#F7EAEA; --shadow:none;
+  }
+  @page{margin:15mm 13mm}
+  body{background:#fff; font-size:10.2pt; line-height:1.5}
+  .wrap{max-width:none; padding:0}
+  .col{max-width:none}
+  header{padding-top:0; margin-bottom:24px}
+  h1{font-size:29pt}
+  .standfirst{font-size:12.5pt}
+  h2{font-size:15.5pt; margin:24px 0 4px; break-after:avoid; break-inside:avoid}
+  h3{font-size:11.5pt; break-after:avoid; break-inside:avoid}
+  p{orphans:3; widows:3}
+  .callout,.panel,.duo,table,.tw,.formula{break-inside:avoid}
+  .tw{overflow:visible}
+  table{min-width:0; font-size:9pt}
+  th,td{padding:5px 10px 5px 0}
+  td.n+td,th.n+th{padding-left:14px}
+  footer{margin-top:30px}
+}
+@media (max-width:720px){
+  body{font-size:16px}
+  .wrap{padding:0 20px 64px}
+  .duo{grid-template-columns:1fr}
+}
+</style>
+
+<div class="wrap">
+
+<header>
+  <p class="eyebrow">Worked example · Parameters for the best small bank</p>
+  <h1>The Binding Constraint</h1>
+  <p class="standfirst">Defining the parameters that govern one small bank's credit-card book, and finding the portfolio that earns the most while staying inside every Basel rule. Capital turns out not to be what stops it.</p>
+  <div class="meta">
+    <span><b>Comenity Bank</b> · RSSD 1391778</span>
+    <span>Year-end <b>2025</b> Call Report</span>
+    <span><b>$7.8bn</b> assets · <b>100%</b> credit cards</span>
+  </div>
+</header>
+
+<div class="col">
+<p class="lede">The project's order of work is rules, then parameters, then use. This is the third step carried out end to end on one bank: every coefficient below is either a number lifted from the Basel Framework with its paragraph cited, or a rate computed from the bank's own filing. Nothing is assumed except where the text says so.</p>
+</div>
+
+<h2><span class="num">01 — Selection</span>Which small bank is the best one</h2>
+<div class="col">
+<p>"Best" needs a criterion before it means anything. For a card book the defensible one is <strong>risk-adjusted margin</strong> — what the portfolio earns after the losses it actually incurs — read alongside return on assets and equity. All three come straight from the filing.</p>
+</div>
+
+<div class="tw">
+<table>
+  <caption>Small banks (under $10bn) with a credit-card book above $50m, year-end 2025. Yield is interest income on cards over average card balances; losses are net charge-offs on the same base.</caption>
+  <thead><tr>
+    <th>Bank</th><th class="n">Card book</th><th class="n">Yield</th><th class="n">Losses</th>
+    <th class="n">Risk-adj.</th><th class="n">ROA</th><th class="n">ROE</th><th class="n">CET1</th>
+  </tr></thead>
+  <tbody>
+    <tr><td>Capital Bank NA</td><td class="n">$138m</td><td class="n">44.7%</td><td class="n">5.2%</td><td class="n">39.5%</td><td class="n">1.4%</td><td class="n">15.0%</td><td class="n">11.3%</td></tr>
+    <tr><td>1st Financial Bank USA</td><td class="n">$361m</td><td class="n">26.2%</td><td class="n">6.1%</td><td class="n">20.1%</td><td class="n">1.2%</td><td class="n">7.0%</td><td class="n">21.0%</td></tr>
+    <tr class="hl"><td>Comenity Bank</td><td class="n">$6,756m</td><td class="n">26.8%</td><td class="n">7.0%</td><td class="n">19.8%</td><td class="n">4.8%</td><td class="n">35.8%</td><td class="n">15.1%</td></tr>
+    <tr><td>Lead Bank</td><td class="n">$326m</td><td class="n">19.3%</td><td class="n">2.2%</td><td class="n">17.1%</td><td class="n">1.0%</td><td class="n">11.5%</td><td class="n">23.6%</td></tr>
+    <tr><td>Credit One Bank</td><td class="n">$1,711m</td><td class="n">26.5%</td><td class="n">11.1%</td><td class="n">15.5%</td><td class="n">26.2%</td><td class="n">92.9%</td><td class="n">—</td></tr>
+    <tr><td>Merrick Bank</td><td class="n">$6,289m</td><td class="n">22.0%</td><td class="n">12.1%</td><td class="n">9.9%</td><td class="n">1.1%</td><td class="n">5.3%</td><td class="n">20.1%</td></tr>
+  </tbody>
+</table>
+</div>
+
+<div class="col">
+<p><strong>Credit One earns more and cannot be analysed.</strong> Its 26.2% return on assets and 92.9% on equity are the best in the population by a wide margin — and it has elected the community bank leverage ratio, so it reports no risk-weighted assets at all. Every capital constraint in this exercise is a ratio to RWA. For Credit One those ratios do not exist, which is a finding about the US framework rather than a gap in the data.</p>
+<p><strong>Comenity is the best performer among banks the rules can be applied to.</strong> Fourth on risk-adjusted margin but far ahead on returns, at real scale, with a loan book that is 100% credit cards and $37.8bn of committed but undrawn lines. Everything the credit-card rules govern is present in one balance sheet.</p>
+</div>
+
+<h2><span class="num">02 — Parameters</span>What governs this bank</h2>
+<div class="col">
+<p>Three groups, and the distinction matters: the first is fixed by the regulator, the second is a property of this bank measured from its filing, the third is what management actually controls.</p>
+</div>
+
+<h3>Regulatory parameters — fixed by the rules</h3>
+<div class="tw">
+<table>
+  <caption>Each drawn from the extracted rulebook, with the paragraph it comes from.</caption>
+  <thead><tr><th>Parameter</th><th class="n">Value</th><th>Source</th><th>Governs</th></tr></thead>
+  <tbody>
+    <tr><td>Risk weight — regulatory retail, non-transactor</td><td class="n">75%</td><td><span class="cite">CRE20.68(1)</span></td><td>Capital against drawn card balances</td></tr>
+    <tr><td>Risk weight — transactors</td><td class="n">45%</td><td><span class="cite">CRE20.68(2)</span></td><td>Unusable: the split is not reported</td></tr>
+    <tr class="hl"><td>Conversion factor — unconditionally cancellable</td><td class="n">10%</td><td><span class="cite">CRE20.100</span></td><td>Capital against undrawn lines</td></tr>
+    <tr><td>Risk weight — cash and central bank balances</td><td class="n">0%</td><td><span class="cite">CRE20.110</span></td><td>Capital against liquidity held</td></tr>
+    <tr><td>Minimum CET1 ratio</td><td class="n">4.5%</td><td><span class="cite">RBC20.1(1)</span></td><td>Hard capital floor</td></tr>
+    <tr><td>Capital conservation buffer</td><td class="n">2.5%</td><td><span class="cite">RBC30.2</span></td><td>Effective CET1 requirement of 7.0%</td></tr>
+    <tr><td>Minimum leverage ratio</td><td class="n">3%</td><td><span class="cite">LEV20.7</span></td><td>Non-risk-based backstop</td></tr>
+    <tr class="hl"><td>Drawdown on committed retail facilities</td><td class="n">5%</td><td><span class="cite">LCR40.64(1)</span></td><td>Liquidity to hold against lines</td></tr>
+  </tbody>
+</table>
+</div>
+<p class="note">The 5% drawdown is applied here as a <em>chosen stress</em>, not a requirement. LCR40.59 excludes unconditionally cancellable facilities from that section and routes them to national discretion under LCR40.67 — the same property that earns a card line its low conversion factor removes it from the committed-facility run-off. Borrowing the rate Basel sets for facilities a bank cannot cancel is deliberately conservative, and the sensitivity in section 06 shows how much rides on it.</p>
+
+<h3>Bank parameters — measured from the filing</h3>
+<div class="tw">
+<table>
+  <caption>Every rate computed from Comenity's own year-end 2025 Call Report. Averages use Schedule RC-K where the item is a flow.</caption>
+  <thead><tr><th>Parameter</th><th class="n">Value</th><th>Derived from</th></tr></thead>
+  <tbody>
+    <tr><td>Card yield</td><td class="n">26.76%</td><td>Interest income on cards <code>RIADB485</code> ÷ average balances <code>RCONB561</code></td></tr>
+    <tr><td>Fee and interchange income</td><td class="n">1.96%</td><td>Noninterest income <code>RIAD4079</code> ÷ card balances</td></tr>
+    <tr><td>Operating cost</td><td class="n">12.18%</td><td>Noninterest expense <code>RIAD4093</code> ÷ card balances</td></tr>
+    <tr><td>Net charge-offs</td><td class="n">6.98%</td><td>Charge-offs less recoveries <code>RIADB514−B515</code> ÷ average balances</td></tr>
+    <tr class="tot"><td>Card contribution before funding</td><td class="n">9.55%</td><td>yield + fees − losses − opex</td></tr>
+    <tr><td>Yield on cash</td><td class="n">4.67%</td><td>Interest on balances due <code>RIAD4115</code> ÷ cash</td></tr>
+    <tr><td>Cost of funding</td><td class="n">4.50%</td><td>Interest expense <code>RIAD4073</code> ÷ liabilities</td></tr>
+    <tr><td>Line utilisation</td><td class="n">15.2%</td><td>drawn ÷ (drawn + undrawn), <code>RCONB538</code> and <code>RCON3815</code></td></tr>
+  </tbody>
+</table>
+</div>
+<p class="note">The securities yield is set at 4.2% rather than measured: Comenity holds $78m against a $7.8bn balance sheet, so the rate is not identified from its own filing. Nothing in the result turns on it — securities are value-destroying at this funding cost and the optimiser holds none either way.</p>
+
+<h3>Decision variables — what management controls</h3>
+<div class="formula">
+<b>c</b>  drawn credit-card receivables<br>
+<b>u</b>  committed but undrawn card lines<br>
+<b>s</b>  investment securities<br>
+<b>h</b>  cash and balances due
+</div>
+
+<h2><span class="num">03 — Objective</span>Profit, written down</h2>
+<div class="col">
+<p>Each asset earns its rate and is funded at the same cost, so contribution is the spread over funding. Undrawn lines earn nothing until they are drawn — they enter only through the constraints they impose.</p>
+</div>
+<div class="formula">
+maximise   (0.0955 − 0.0450)·<b>c</b>  +  (0.0420 − 0.0450)·<b>s</b>  +  (0.0467 − 0.0450)·<b>h</b><br>
+       =      <b>5.05%</b>·c        −      0.30%·s        +      0.17%·h
+</div>
+<div class="col">
+<p>The shape of the answer is already visible. A dollar in cards earns <strong>5.05 cents</strong> over funding; a dollar in securities <em>loses</em> 0.30 cents; a dollar in cash earns 0.17. A monoline card bank has no attractive alternative to lending, so the question is not what to hold but <strong>how much, and what stops it</strong>.</p>
+<p class="note">This is contribution, not the bank's reported profit. It charges funding against every asset including the equity-funded portion, and uses realised charge-offs rather than the accounting provision. Both make allocations comparable; both are constants with respect to the allocation and so change no decision. Reported pre-tax profit for 2025 was $450.7m.</p>
+</div>
+
+<h2><span class="num">04 — Constraints</span>What the rules impose</h2>
+
+<div class="formula">
+<b>Capital</b>       0.75(c + 0.10u) + 0.20s  ≤  CET1 ÷ 7.0%  =  $15,066m
+   <span style="color:var(--ink-3)">CRE20.68(1) · CRE20.100 · RBC20.1 · RBC30.2</span><br><br>
+<b>Leverage</b>      c + s + h + 0.10u  ≤  Tier 1 ÷ 3%  =  $35,153m
+   <span style="color:var(--ink-3)">LEV20.7</span><br><br>
+<b>Liquidity</b>     s + h  ≥  0.05u
+   <span style="color:var(--ink-3)">LCR40.64(1), applied as a stress</span><br><br>
+<b>Funding</b>       c + s + h  ≤  $9,313m   (assets +20%)<br><br>
+<b>Utilisation</b>   10%  ≤  c ÷ (c + u)  ≤  25%
+</div>
+
+<div class="col">
+<p>The last two are not regulatory. <strong>Funding capacity</strong> bounds how fast a deposit franchise can grow; without it the problem becomes a statement about capital alone and returns an answer no bank could execute. Comenity's balance sheet <em>shrank</em> from $8.68bn to $7.76bn over the three years to 2025, so permitting +20% is already generous.</p>
+<p><strong>Utilisation</strong> is a property of the customer base, not a dial. A bank can withdraw lines, raising utilisation; it cannot make customers borrow. Comenity's own range over twelve quarters was 12.1% to 15.2%, so a 25% ceiling is a stretch assumption and is tested in section 06.</p>
+</div>
+
+<h2><span class="num">05 — Result</span>The profit-maximising book</h2>
+
+<div class="tw">
+<table>
+  <caption>Linear program solved over (c, u, s, h). All figures $m.</caption>
+  <thead><tr><th></th><th class="n">Cards</th><th class="n">Undrawn lines</th><th class="n">Cash</th><th class="n">Assets</th><th class="n">Contribution</th></tr></thead>
+  <tbody>
+    <tr><td>Today</td><td class="n">6,756</td><td class="n">37,768</td><td class="n">1,149</td><td class="n">7,760</td><td class="n">343</td></tr>
+    <tr><td>Grow 20%, lines scale with the book</td><td class="n">7,281</td><td class="n">40,623</td><td class="n">2,031</td><td class="n">9,313</td><td class="n">372</td></tr>
+    <tr class="hl"><td>Grow 20% and cut unused lines</td><td class="n">8,098</td><td class="n">24,294</td><td class="n">1,215</td><td class="n">9,313</td><td class="n">411</td></tr>
+  </tbody>
+</table>
+</div>
+
+<div class="duo">
+  <div class="panel">
+    <span class="stat">+$40m</span>
+    <span class="stat-l">from withdrawing $13.5bn of unused committed lines — the larger half of the gain</span>
+  </div>
+  <div class="panel">
+    <span class="stat">+$28m</span>
+    <span class="stat-l">from growing the balance sheet 20% with the line book held proportional</span>
+  </div>
+</div>
+
+<div class="col">
+<p>Total <strong>+$68m, a 20% improvement</strong> in contribution. And the larger share comes not from growth but from <strong>shrinking something</strong> — the undrawn book.</p>
+<p>The mechanism is the liquidity constraint. Every dollar of committed line obliges the bank to hold five cents in cash against a drawdown. That cash earns 4.67% while a dollar of card receivable earns 9.55% before funding. Carrying $37.8bn of lines locks up $1.89bn of balance sheet in the lowest-yielding asset it owns. Cutting the line book to $24.3bn releases that capacity into receivables.</p>
+</div>
+
+<div class="callout key">
+  <h3>What binds, and what does not</h3>
+  <p>Three constraints are active at the optimum: the <strong>liquidity cover</strong> on committed lines, the <strong>funding capacity</strong> bound, and the <strong>utilisation ceiling</strong>. Capital is not among them.</p>
+  <p>At the optimal book, risk-weighted assets are $7,895m and the 7% requirement calls for $553m of CET1. Comenity holds <strong>$1,055m — 1.9 times what it needs</strong>. The capital constraint only begins to bite after a <strong>48% loss of CET1</strong>.</p>
+  <p>This inverts the intuition the capital rules invite. For this bank, Basel's capital apparatus is slack; what actually limits profit is the liquidity it must carry against promises it has already made, and the deposits it can raise.</p>
+</div>
+
+<h2><span class="num">06 — Sensitivity</span>How much rides on the assumptions</h2>
+
+<div class="tw">
+<table>
+  <caption>Contribution ($m) and the binding set, across the two assumed bounds.</caption>
+  <thead><tr><th>Balance-sheet growth</th><th class="n">Util. ceiling 20%</th><th class="n">Util. ceiling 25%</th><th>Binding constraints</th></tr></thead>
+  <tbody>
+    <tr><td>0% — no growth at all</td><td class="n">329</td><td class="n">343</td><td>liquidity · funding · utilisation</td></tr>
+    <tr><td>+10%</td><td class="n">362</td><td class="n">377</td><td>liquidity · funding · utilisation</td></tr>
+    <tr class="hl"><td>+20% — base case</td><td class="n">395</td><td class="n">411</td><td>liquidity · funding · utilisation</td></tr>
+    <tr><td>+30%</td><td class="n">428</td><td class="n">446</td><td>liquidity · funding · utilisation</td></tr>
+  </tbody>
+</table>
+</div>
+
+<div class="col">
+<p><strong>The binding set never changes.</strong> Across every combination tested, the same three constraints are active and capital is never one of them. The level of profit moves with the assumptions; the conclusion about what limits the bank does not.</p>
+<p>At zero growth the optimum equals today's contribution of $343m, which is the honest reading: with no capacity to expand and utilisation already at its ceiling, there is nothing left to reallocate. The book is entirely credit cards and credit cards are the best asset available. <strong>The gains require either new funding or fewer unused lines.</strong></p>
+</div>
+
+<h2><span class="num">07 — Validation</span>The model agrees with management</h2>
+<div class="col">
+<p>A portfolio recommendation that no practitioner would recognise is a warning sign. This one is what Comenity has in fact been doing.</p>
+<p>Over the twelve quarters to December 2025 the bank withdrew <strong>$14.2bn of committed card lines</strong>, from $52.0bn to $37.8bn — a 27% reduction — while its utilisation climbed from 12.8% to 15.2%. The optimiser, given only the bank's rates and the rules, independently proposes cutting a further $13.5bn and pushing utilisation higher still.</p>
+<p>The model did not have access to that history. It reproduces the direction of travel from the economics alone, which is the strongest evidence available here that the parameterisation is sound.</p>
+</div>
+
+<h2><span class="num">08 — Limits</span>What this does not do</h2>
+<div class="col">
+<p><strong>The transactor split is unobservable</strong>, so the 45% risk weight in <span class="cite">CRE20.68(2)</span> cannot be claimed and 75% is used throughout. Since capital is slack, this changes no decision here — but it would matter for a thinner-capitalised bank.</p>
+<p><strong>Basel and the US rule give the same answer for this bank.</strong> Under 12 CFR 217.33(b)(1) the undrawn lines convert at 0% rather than Basel's 10%, and retail carries a flat 100% rather than 75%. Both were run; the allocation is identical, because capital binds under neither. The divergence that matters so much elsewhere in this project is immaterial <em>here</em>, and only because of how much capital this bank carries.</p>
+<p><strong>The buckets are coarse.</strong> A real allocation would distinguish partner programmes, vintages and credit tiers, each with its own yield and loss curve. Call Report aggregation supports four buckets, not forty.</p>
+<p><strong>Rates are held constant.</strong> The model assumes the marginal card dollar earns what the average one earns. Growing a book 20% would in practice mean lending further down the credit spectrum, at higher yield and higher loss. That is precisely what the scenario phase should perturb.</p>
+</div>
+
+<div class="callout flag">
+  <h3>What this sets up</h3>
+  <p>The five-step assessment produced a comparable profile; this produces an objective function and a constraint set. A scenario is now something specific: a shock that moves one parameter and re-solves. A funding shock tightens the capacity bound. A drawdown shock raises the 5% cover rate. A migration of the book from regulatory retail to other retail moves the risk weight from 75% to 100%. A loss shock raises the 6.98% charge-off rate until the card margin no longer clears funding.</p>
+  <p>Each is bounded by something observed in the twelve-quarter panel rather than invented, which is the plausibility test the brief requires.</p>
+</div>
+
+<footer>
+  <p>Worked example · Comenity Bank, RSSD 1391778 · Sources: BIS consolidated Basel Framework for every regulatory parameter; FFIEC Call Report year-end 2025 via the CDR public bulk distribution for every bank parameter. Linear program solved with SciPy HiGHS. Monetary amounts in US dollars. Contribution is a model measure defined in section 03, not reported profit.</p>
+</footer>
+
+</div>
