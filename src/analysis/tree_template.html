@@ -257,6 +257,45 @@ mark{background:var(--warn-bg); color:inherit; padding:0 1px; border-radius:2px}
 .pval i{font-style:normal; color:var(--ink-3)}
 .pval.plain b{color:var(--ink)}
 
+/* ---------- node-link diagram ---------- */
+#diagram{display:none; position:relative; overflow:hidden; background:var(--paper)}
+#diagram.on{display:block; flex:1 1 auto; min-height:0}
+#dsvg{display:block; width:100%; height:100%; cursor:grab; touch-action:none}
+#dsvg.drag{cursor:grabbing}
+.dctl{
+  position:absolute; top:14px; left:18px; z-index:2;
+  display:flex; flex-wrap:wrap; gap:8px; align-items:center;
+  background:var(--surface); border:1px solid var(--rule); border-radius:6px;
+  padding:8px 11px; box-shadow:0 2px 10px -4px rgba(0,0,0,.3);
+}
+.dhint{
+  position:absolute; bottom:14px; left:18px; z-index:2;
+  font-family:"IBM Plex Sans",sans-serif; font-size:11.5px; color:var(--ink-3);
+}
+.dedge{fill:none; stroke:var(--rule); stroke-width:1.4}
+.dedge.hot{stroke:var(--accent-line); stroke-width:2}
+.dnode{cursor:pointer}
+.dbox{
+  fill:var(--surface); stroke:var(--rule); stroke-width:1.2; rx:5;
+  transition:stroke .12s ease, fill .12s ease;
+}
+.dnode:hover .dbox{stroke:var(--accent-line)}
+.dnode.sel .dbox{stroke:var(--accent); stroke-width:2; fill:var(--accent-soft)}
+.dnode.shut .dbox{stroke-dasharray:3 2.5}
+.drail{rx:2}
+.dlabel{
+  font-family:"IBM Plex Sans",system-ui,sans-serif; font-size:12.5px; font-weight:500;
+  fill:var(--ink); dominant-baseline:middle; pointer-events:none;
+}
+.dmeta{
+  font-family:"IBM Plex Mono",monospace; font-size:10px; fill:var(--ink-3);
+  dominant-baseline:middle; pointer-events:none;
+}
+.dplus{
+  font-family:"IBM Plex Mono",monospace; font-size:11px; font-weight:600;
+  fill:var(--accent-line); dominant-baseline:middle; text-anchor:middle; pointer-events:none;
+}
+
 /* a rule opened in place */
 .rdet{
   white-space:normal; margin:5px 0 12px; padding:15px 19px; max-width:78ch;
@@ -278,7 +317,7 @@ mark{background:var(--warn-bg); color:inherit; padding:0 1px; border-radius:2px}
   .ovbar,.jump{display:none !important}
   .pline{break-inside:avoid}
   #overview{display:block !important; overflow:visible; padding:0}
-  .body{display:none !important}
+  .body,#diagram{display:none !important}
   .app{height:auto}
   .ltree{font-size:8.5pt; line-height:1.6; white-space:pre-wrap; overflow:visible}
   .tline{break-inside:avoid}
@@ -299,6 +338,7 @@ mark{background:var(--warn-bg); color:inherit; padding:0 1px; border-radius:2px}
     <p class="sub" id="sub"></p>
     <div class="tabs" role="tablist">
       <button class="tab" id="tab-ov" role="tab" aria-selected="true" type="button">Whole tree</button>
+      <button class="tab" id="tab-dg" role="tab" aria-selected="false" type="button">Diagram</button>
       <button class="tab" id="tab-ex" role="tab" aria-selected="false" type="button">Explore</button>
     </div>
     <label class="toggle" id="rulesToggle"><input type="checkbox" id="showRules" checked> rule lines</label>
@@ -316,6 +356,16 @@ mark{background:var(--warn-bg); color:inherit; padding:0 1px; border-radius:2px}
       <span class="hint">click a branch to unfold · click a rule to read it · tick <em>parameters</em> for the quantities on each branch</span>
     </div>
     <div class="ltree" id="ltree"></div>
+  </section>
+  <section id="diagram">
+    <div class="dctl">
+      <button class="mini" id="dFit" type="button">Fit</button>
+      <button class="mini" id="dExpand" type="button">Expand all</button>
+      <button class="mini" id="dCollapse" type="button">Collapse</button>
+      <label class="toggle"><input type="checkbox" id="dRules"> show rules as leaves</label>
+    </div>
+    <svg id="dsvg"><g id="dstage"></g></svg>
+    <p class="dhint">click a node to open or close it · drag to pan · scroll to zoom · double-click a node to send it to the explorer</p>
   </section>
   <div class="body">
     <nav id="tree" aria-label="Rule taxonomy"></nav>
@@ -622,19 +672,191 @@ window.addEventListener('beforeprint', () => {
   Object.keys(byId).forEach(id => openNodes.add(id)); drawTree();
 });
 
+/* ---------- node-link diagram ---------- */
+const NS = 'http://www.w3.org/2000/svg';
+const dsvg = document.getElementById('dsvg'), dstage = document.getElementById('dstage');
+const dRules = document.getElementById('dRules');
+const LEVEL_W = 300, ROW_H = 34, BOX_H = 26;
+const FAMHUE = {assets:'#5B6FA8', funding:'#3F7F77', obs:'#96702A',
+                capital:'#6E5A9E', cross:'#4F7355'};
+let view = {x:40, y:20, k:1}, dsel = 'root';
+
+const el = (name, attrs = {}) => {
+  const e = document.createElementNS(NS, name);
+  for (const k in attrs) e.setAttribute(k, attrs[k]);
+  return e;
+};
+const famHue = id => {
+  let c = id;
+  while (parentOf[c] && parentOf[c] !== 'root') c = parentOf[c];
+  return FAMHUE[c] || 'var(--accent-line)';
+};
+const trunc = (t, n) => t.length > n ? t.slice(0, n - 1).trimEnd() + '…' : t;
+// a collapsed node carries a + badge inside the box, so it needs the room
+const boxW = (t, plus) => Math.min(268, Math.max(96, 24 + t.length * 6.9)) + (plus ? 16 : 0);
+const metaW = t => t.length * 5.9 + 10;
+
+// Reingold-style layered layout: depth sets x, leaf order sets y, a parent sits
+// at the midpoint of its children.
+function layout(){
+  let cursor = 0;
+  const nodes = [], edges = [];
+
+  (function walk(n, depth){
+    const kids = openNodes.has(n.id) ? n.children : [];
+    const leaves = openNodes.has(n.id) && dRules.checked
+      ? n.rules.map(rid => ({id:'R:'+rid, rule:rid, label:RULES[rid].t,
+                             children:[], rules:[], t:0, isRule:true}))
+      : [];
+    const all = kids.concat(leaves);
+
+    if (!all.length){
+      n._y = cursor; cursor += ROW_H;
+    } else {
+      all.forEach(c => walk(c, depth + 1));
+      n._y = (all[0]._y + all[all.length - 1]._y) / 2;
+    }
+    n._x = depth * LEVEL_W;
+    n._depth = depth;
+    nodes.push(n);
+    all.forEach(c => edges.push([n, c]));
+  })(TREE, 0);
+
+  return {nodes, edges};
+}
+
+function drawDiagram(){
+  const {nodes, edges} = layout();
+  const frag = document.createDocumentFragment();
+
+  // measure first: edges must leave from beyond the count text, or the two collide
+  nodes.forEach(n => {
+    n._label = trunc(n.label, 34);
+    n._expandable = !n.isRule && (n.children.length > 0 || (dRules.checked && n.rules.length > 0));
+    n._plus = n._expandable && !openNodes.has(n.id);
+    n._w = boxW(n._label, n._plus);
+    n._meta = n.isRule ? RULES[n.rule].c : `${n.t}${n.pt ? ' · ' + n.pt + 'p' : ''}`;
+    n._out = n._w + metaW(n._meta) + 8;
+  });
+
+  edges.forEach(([a, b]) => {
+    const x1 = a._x + a._out, y1 = a._y + BOX_H / 2;
+    const x2 = b._x, y2 = b._y + BOX_H / 2;
+    const mid = (x1 + x2) / 2;
+    frag.appendChild(el('path', {class:'dedge',
+      d:`M${x1},${y1} C${mid},${y1} ${mid},${y2} ${x2},${y2}`}));
+  });
+
+  nodes.forEach(n => {
+    const label = n._label, w = n._w;
+    const expandable = n._expandable;
+    const isOpen = openNodes.has(n.id);
+    const g = el('g', {class:'dnode' + (n.id === dsel ? ' sel' : '') +
+                              (expandable && !isOpen ? ' shut' : ''),
+                       transform:`translate(${n._x},${n._y})`});
+    g.appendChild(el('rect', {class:'dbox', x:0, y:0, width:w, height:BOX_H}));
+    if (!n.isRule)
+      g.appendChild(el('rect', {class:'drail', x:0, y:0, width:3, height:BOX_H,
+                                fill:famHue(n.id)}));
+    const t = el('text', {class:'dlabel', x:12, y:BOX_H / 2});
+    t.textContent = label;
+    if (n.isRule) t.setAttribute('font-size', '11');
+    g.appendChild(t);
+
+    const meta = el('text', {class:'dmeta', x:w + 8, y:BOX_H / 2});
+    meta.textContent = n._meta;
+    g.appendChild(meta);
+
+    if (n._plus){
+      const badge = el('text', {class:'dplus', x:w - 10, y:BOX_H / 2});
+      badge.textContent = '+';
+      g.appendChild(badge);
+    }
+    const title = el('title');
+    title.textContent = n.isRule ? RULES[n.rule].s : (n.desc || n.label);
+    g.appendChild(title);
+
+    g.addEventListener('click', e => {
+      e.stopPropagation();
+      if (n.isRule){ dsel = n.id; showView('ex'); select(parentOf[n.id] || 'root'); return; }
+      dsel = n.id;
+      if (expandable) openNodes.has(n.id) ? openNodes.delete(n.id) : openNodes.add(n.id);
+      drawDiagram();
+    });
+    g.addEventListener('dblclick', e => {
+      e.stopPropagation();
+      if (!n.isRule){ showView('ex'); select(n.id); }
+    });
+    frag.appendChild(g);
+  });
+
+  dstage.replaceChildren(frag);
+  applyView();
+}
+
+function applyView(){
+  dstage.setAttribute('transform', `translate(${view.x},${view.y}) scale(${view.k})`);
+}
+
+function fitDiagram(){
+  const b = dstage.getBBox();
+  const r = dsvg.getBoundingClientRect();
+  if (!b.width || !b.height || !r.width) return;
+  const k = Math.min((r.width - 80) / b.width, (r.height - 80) / b.height, 1.4);
+  view = {k, x: 40 - b.x * k, y: (r.height - b.height * k) / 2 - b.y * k};
+  applyView();
+}
+
+dsvg.addEventListener('wheel', e => {
+  e.preventDefault();
+  const r = dsvg.getBoundingClientRect();
+  const mx = e.clientX - r.left, my = e.clientY - r.top;
+  const k = Math.min(2.6, Math.max(0.15, view.k * (e.deltaY < 0 ? 1.12 : 1 / 1.12)));
+  view.x = mx - (mx - view.x) * (k / view.k);
+  view.y = my - (my - view.y) * (k / view.k);
+  view.k = k;
+  applyView();
+}, {passive:false});
+
+let drag = null;
+dsvg.addEventListener('pointerdown', e => {
+  drag = {x:e.clientX - view.x, y:e.clientY - view.y};
+  dsvg.classList.add('drag'); dsvg.setPointerCapture(e.pointerId);
+});
+dsvg.addEventListener('pointermove', e => {
+  if (!drag) return;
+  view.x = e.clientX - drag.x; view.y = e.clientY - drag.y; applyView();
+});
+dsvg.addEventListener('pointerup', () => { drag = null; dsvg.classList.remove('drag'); });
+
+dRules.addEventListener('change', drawDiagram);
+document.getElementById('dFit').addEventListener('click', fitDiagram);
+document.getElementById('dExpand').addEventListener('click', () => {
+  Object.keys(byId).forEach(id => openNodes.add(id)); drawDiagram(); fitDiagram();
+});
+document.getElementById('dCollapse').addEventListener('click', () => {
+  openNodes.clear(); openNodes.add('root'); drawDiagram(); fitDiagram();
+});
+
 /* ---------- view switching ---------- */
 const tabOv = document.getElementById('tab-ov'), tabEx = document.getElementById('tab-ex');
+const tabDg = document.getElementById('tab-dg');
 const ovEl = document.getElementById('overview'), bodyEl = document.querySelector('.body');
+const dgEl = document.getElementById('diagram');
 function showView(v){
-  const ov = v === 'ov';
-  ovEl.classList.toggle('on', ov);
-  bodyEl.style.display = ov ? 'none' : 'grid';
-  tabOv.setAttribute('aria-selected', String(ov));
-  tabEx.setAttribute('aria-selected', String(!ov));
-  document.getElementById('rulesToggle').style.display = ov ? 'flex' : 'none';
-  document.getElementById('paramsToggle').style.display = ov ? 'flex' : 'none';
+  ovEl.classList.toggle('on', v === 'ov');
+  dgEl.classList.toggle('on', v === 'dg');
+  bodyEl.style.display = v === 'ex' ? 'grid' : 'none';
+  tabOv.setAttribute('aria-selected', String(v === 'ov'));
+  tabDg.setAttribute('aria-selected', String(v === 'dg'));
+  tabEx.setAttribute('aria-selected', String(v === 'ex'));
+  const treeChrome = v === 'ov' ? 'flex' : 'none';
+  document.getElementById('rulesToggle').style.display = treeChrome;
+  document.getElementById('paramsToggle').style.display = treeChrome;
+  if (v === 'dg'){ drawDiagram(); requestAnimationFrame(fitDiagram); }
 }
 tabOv.addEventListener('click', () => showView('ov'));
+tabDg.addEventListener('click', () => showView('dg'));
 tabEx.addEventListener('click', () => showView('ex'));
 
 drawTree();
